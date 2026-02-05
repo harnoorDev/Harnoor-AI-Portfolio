@@ -53,40 +53,40 @@ export default function About() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="about" className="py-32 px-4 relative">
-      <div className="max-w-6xl mx-auto" ref={ref}>
+    <section id="about" className="py-32 px-6 md:px-8 relative">
+      <div className="max-w-7xl mx-auto" ref={ref}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
             About <span className="gradient-text">Me</span>
           </h2>
-          <p className="text-gray-400 text-lg max-w-3xl mx-auto">
+          <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
             Cloud & AI Engineer specializing in designing and deploying secure, production-grade 
             enterprise solutions across cloud infrastructure, LLM operations, and generative AI systems.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
           {highlights.map((item, index) => (
             <motion.div
               key={item.title}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="glass-card p-6 flex gap-4"
+              className="glass-card p-6 lg:p-8 flex gap-5"
             >
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                  <item.icon className="w-6 h-6 text-cyan-400" />
+                <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
+                  <item.icon className="w-7 h-7 text-cyan-400" />
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-400 text-sm">{item.description}</p>
+                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{item.description}</p>
               </div>
             </motion.div>
           ))}
