@@ -3,38 +3,48 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Shield, Cloud, Brain, Lock, Briefcase, GraduationCap } from "lucide-react";
+import { Shield, Cloud, Brain, Cpu, Target, Server, GraduationCap, Building } from "lucide-react";
 
 const highlights = [
   {
-    icon: Briefcase,
-    title: "Azure Cloud Engineer",
-    description: "Currently at Symcor, implementing secure cloud infrastructure and automation",
+    icon: Brain,
+    title: "LLM Engineering & MLOps",
+    description: "Building enterprise AI with Azure OpenAI, LangChain, LangGraph, LangSmith. Multi-agent workflows, LoRA fine-tuning, model quantization.",
   },
   {
-    icon: Brain,
-    title: "AI Engineering",
-    description: "Designing and deploying intelligent systems with LLMs and ML pipelines",
+    icon: Cpu,
+    title: "Advanced RAG Systems",
+    description: "Hybrid search architectures, semantic chunking, reranking with cross-encoders, HyDE, multi-query expansion.",
+  },
+  {
+    icon: Target,
+    title: "AI Red Teaming",
+    description: "Adversarial assessments with OWASP LLM Top 10 & MITRE ATLAS. Prompt injection, jailbreak exploits, PyRIT, Garak.",
   },
   {
     icon: Cloud,
     title: "Cloud Architecture",
-    description: "Scalable solutions on Azure & AWS with Docker, Kubernetes, and Terraform",
+    description: "Azure AI Services, Functions, Cosmos DB, Sentinel. NVIDIA NIM, Triton Inference Server, TensorRT-LLM on Kubernetes.",
   },
   {
     icon: Shield,
-    title: "AI Security",
-    description: "Securing LLM applications against OWASP top 10 risks and backdoor attacks",
+    title: "Security & Compliance",
+    description: "mTLS/TLS/SSL protocols, Azure WAF, Cloudflare WAF, PKI infrastructure, certificate-based authentication.",
   },
   {
-    icon: Lock,
-    title: "Production-Grade",
-    description: "Building robust, secure systems ready for enterprise deployment",
+    icon: Server,
+    title: "Infrastructure & DevOps",
+    description: "Docker, Kubernetes, Helm, Terraform, ARM templates. CI/CD with Azure DevOps and Jenkins.",
+  },
+  {
+    icon: Building,
+    title: "4+ Years at Symcor",
+    description: "Cloud Engineer 1 → 2 → 3. Canadian Open Banking project, enterprise GenAI solutions, AI governance frameworks.",
   },
   {
     icon: GraduationCap,
     title: "Sheridan College",
-    description: "Foundation in software development and cloud technologies",
+    description: "Foundation in software development, cloud technologies, and systems design.",
   },
 ];
 
@@ -54,13 +64,13 @@ export default function About() {
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             About <span className="gradient-text">Me</span>
           </h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Cloud & AI Engineer with a passion for building secure, intelligent systems.
-            Currently crafting cloud solutions at Symcor while exploring the cutting edge of AI security.
+          <p className="text-gray-400 text-lg max-w-3xl mx-auto">
+            Cloud & AI Engineer specializing in designing and deploying secure, production-grade 
+            enterprise solutions across cloud infrastructure, LLM operations, and generative AI systems.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           {highlights.map((item, index) => (
             <motion.div
               key={item.title}
@@ -76,7 +86,7 @@ export default function About() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-400">{item.description}</p>
+                <p className="text-gray-400 text-sm">{item.description}</p>
               </div>
             </motion.div>
           ))}

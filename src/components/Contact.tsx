@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Linkedin, Github, Mail, MapPin } from "lucide-react";
+import { Linkedin, Github, Mail, MapPin, Phone } from "lucide-react";
 
 const socials = [
   {
@@ -25,7 +25,7 @@ const socials = [
     icon: Mail,
     url: "mailto:harnoor24@outlook.com",
     color: "#00d4ff",
-    label: "Send me an email",
+    label: "harnoor24@outlook.com",
   },
 ];
 
@@ -45,7 +45,7 @@ export default function Contact() {
             Let&apos;s <span className="gradient-text">Connect</span>
           </h2>
           <p className="text-gray-400 text-lg mb-4">
-            Open to discussing AI projects, cloud architecture, security, or just geeking out about tech.
+            Open to discussing AI projects, cloud architecture, LLM security, or collaboration opportunities.
           </p>
           <div className="flex items-center justify-center gap-2 text-gray-500 mb-12">
             <MapPin className="w-4 h-4" />
@@ -57,7 +57,7 @@ export default function Contact() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex justify-center gap-8"
+          className="flex justify-center gap-8 flex-wrap"
         >
           {socials.map((social, index) => (
             <motion.a
@@ -90,7 +90,9 @@ export default function Contact() {
           className="mt-16 p-6 glass-card"
         >
           <p className="text-gray-400">
-            Currently working as an <span className="text-cyan-400">Azure Cloud Engineer at Symcor</span>
+            <span className="text-cyan-400 font-semibold">Cloud & AI Engineer 3</span> at Symcor
+            <br />
+            <span className="text-sm text-gray-500">4+ years building enterprise cloud & AI solutions</span>
             <br />
             <span className="text-sm text-gray-500">500+ connections on LinkedIn</span>
           </p>

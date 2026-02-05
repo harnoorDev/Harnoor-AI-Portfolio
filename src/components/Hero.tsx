@@ -16,10 +16,13 @@ export default function Hero() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-6"
+          className="mb-6 flex flex-wrap gap-2 justify-center"
         >
           <span className="px-4 py-2 rounded-full text-sm font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-            Azure Cloud & AI Engineer @ Symcor
+            Cloud & AI Engineer 3 @ Symcor
+          </span>
+          <span className="px-4 py-2 rounded-full text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+            AI Red Teamer
           </span>
         </motion.div>
 
@@ -37,18 +40,20 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-8"
+          className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-8"
         >
-          Building secure, production-grade AI & cloud systems.
+          Building secure, production-grade enterprise AI solutions.
           <br />
-          <span className="text-cyan-400">Toronto, Canada 🇨🇦</span>
+          <span className="text-cyan-400">Azure OpenAI • LangChain • GenAI • LLM Security</span>
+          <br />
+          <span className="text-gray-500 text-lg">Greater Toronto Area, Canada 🇨🇦</span>
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
-          className="flex gap-4 justify-center"
+          className="flex gap-4 justify-center flex-wrap"
         >
           <a
             href="#about"

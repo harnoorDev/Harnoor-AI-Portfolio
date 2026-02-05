@@ -3,39 +3,60 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Award, Shield, Cloud, Database, Network } from "lucide-react";
+import { Award, Cloud, Brain, Network, Shield, Database } from "lucide-react";
 
 const certifications = [
   {
-    name: "Azure Security Engineer",
+    name: "Azure AI Engineer Associate",
+    code: "AI-102",
     issuer: "Microsoft",
-    icon: Shield,
-    description: "Platform protection, identity & access, security operations with Sentinel",
+    icon: Brain,
+    description: "Design and implement AI solutions using Azure Cognitive Services and Azure OpenAI",
     color: "#00A4EF",
   },
   {
-    name: "Azure Cloud Certifications",
+    name: "Azure Administrator Associate",
+    code: "AZ-104",
     issuer: "Microsoft",
     icon: Cloud,
-    description: "Multiple Azure certifications for cloud architecture and services",
+    description: "Implement, manage, and monitor Azure environments",
     color: "#00A4EF",
+  },
+  {
+    name: "Azure Fundamentals",
+    code: "AZ-900",
+    issuer: "Microsoft",
+    icon: Cloud,
+    description: "Cloud concepts, Azure services, security, privacy, and compliance",
+    color: "#00A4EF",
+  },
+  {
+    name: "NVIDIA AI Engineer",
+    code: "",
+    issuer: "NVIDIA",
+    icon: Brain,
+    description: "Deep learning, GPU-accelerated computing, and AI deployment",
+    color: "#76B900",
   },
   {
     name: "CCNA",
+    code: "",
     issuer: "Cisco",
     icon: Network,
-    description: "Cisco Certified Network Associate - Networking fundamentals",
+    description: "Network fundamentals, IP connectivity, security fundamentals",
     color: "#1BA0D7",
   },
   {
     name: "CompTIA",
+    code: "",
     issuer: "CompTIA",
-    icon: Award,
+    icon: Shield,
     description: "IT infrastructure and security foundations",
     color: "#C8202F",
   },
   {
-    name: "Oracle",
+    name: "Oracle Certified",
+    code: "",
     issuer: "Oracle",
     icon: Database,
     description: "Database and cloud technologies",
@@ -60,7 +81,7 @@ export default function Certifications() {
             <span className="gradient-text">Certifications</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Industry-recognized credentials validating expertise in cloud, security, and infrastructure
+            Industry-recognized credentials in cloud, AI, networking, and security
           </p>
         </motion.div>
 
@@ -81,7 +102,14 @@ export default function Certifications() {
                   <cert.icon className="w-7 h-7" style={{ color: cert.color }} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-1">{cert.name}</h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-lg">{cert.name}</h3>
+                    {cert.code && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-gray-400">
+                        {cert.code}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-cyan-400 mb-2">{cert.issuer}</p>
                   <p className="text-sm text-gray-500">{cert.description}</p>
                 </div>

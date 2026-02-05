@@ -6,36 +6,36 @@ import { useRef } from "react";
 
 const skillCategories = [
   {
-    title: "Languages",
-    skills: ["Python", "C#", "TypeScript", "JavaScript", "Java", "C++", "Kotlin", "SQL", "PowerShell"],
+    title: "LLM & GenAI",
+    skills: ["Azure OpenAI", "LangChain", "LangGraph", "LangSmith", "Semantic Kernel", "AutoGen", "CrewAI", "Hugging Face", "vLLM", "Ollama"],
   },
   {
-    title: "AI & ML",
-    skills: ["LangChain", "OpenAI", "PyTorch", "TensorFlow", "Hugging Face", "RAG", "Vector DBs", "LLM Security"],
+    title: "Model Optimization",
+    skills: ["LoRA", "QLoRA", "GPTQ", "AWQ", "GGUF", "INT4/INT8 Quantization", "TensorRT-LLM", "NVIDIA NIM", "Triton Inference Server"],
   },
   {
-    title: "Cloud Platforms",
-    skills: ["Microsoft Azure", "AWS", "Azure Functions", "App Service", "Azure AD", "Azure Sentinel", "Log Analytics"],
+    title: "RAG & Retrieval",
+    skills: ["Hybrid Search", "Dense Embeddings", "BM25", "Semantic Chunking", "Cross-Encoder Reranking", "HyDE", "Multi-Query Expansion", "pgvector", "Pinecone", "Azure AI Search", "FAISS", "ChromaDB"],
   },
   {
-    title: "DevOps & Infra",
-    skills: ["Docker", "Kubernetes", "Terraform", "CI/CD", "GitHub Actions", "Azure DevOps", "Infrastructure as Code"],
+    title: "AI Security & Red Teaming",
+    skills: ["OWASP LLM Top 10", "MITRE ATLAS", "Prompt Injection", "Jailbreak Testing", "PyRIT", "Garak", "PII Detection", "Guardrails", "Content Filtering"],
   },
   {
-    title: "Frameworks",
-    skills: [".NET Core", "ASP.NET MVC", "Node.js", "Next.js", "React", "Spring Boot", "FastAPI", "Express.js"],
+    title: "Cloud & Azure",
+    skills: ["Azure AI Services", "Azure Functions", "Cosmos DB", "Sentinel", "Log Analytics", "App Gateway", "Private Endpoints", "VNet", "Azure WAF", "Azure DevOps"],
   },
   {
-    title: "Databases",
-    skills: ["Azure SQL", "PostgreSQL", "MongoDB", "Redis", "Pinecone", "CosmosDB", "SQL Server"],
+    title: "Infrastructure & DevOps",
+    skills: ["Docker", "Kubernetes", "Helm", "Terraform", "ARM Templates", "Jenkins", "CI/CD", "Cloudflare", "REST APIs", "GraphQL"],
   },
   {
-    title: "Security",
-    skills: ["OWASP Top 10", "OAuth 2.0", "OpenID Connect", "Azure AD Auth", "LLM Security", "Prompt Injection Defense"],
+    title: "Security & Protocols",
+    skills: ["mTLS", "TLS/SSL", "PKI", "OAuth 2.0", "OpenID Connect", "Azure AD", "Certificate Auth", "WAF Rules", "OWASP"],
   },
   {
-    title: "Certifications",
-    skills: ["Microsoft Azure (4x)", "CCNA (Cisco)", "CompTIA", "Oracle"],
+    title: "Languages & Frameworks",
+    skills: ["Python", "C#", "TypeScript", "Node.js", "PowerShell", ".NET Core", "Next.js", "React", "Pandas"],
   },
 ];
 
@@ -56,7 +56,7 @@ export default function Skills() {
             Technical <span className="gradient-text">Skills</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            A comprehensive toolkit for building modern cloud infrastructure and AI-powered applications
+            Full-stack AI engineering — from model optimization to production deployment and security
           </p>
         </motion.div>
 
@@ -80,7 +80,7 @@ export default function Skills() {
                     animate={isInView ? { opacity: 1, scale: 1 } : {}}
                     transition={{
                       duration: 0.4,
-                      delay: catIndex * 0.1 + skillIndex * 0.03,
+                      delay: catIndex * 0.1 + skillIndex * 0.02,
                     }}
                     whileHover={{ scale: 1.05, backgroundColor: "rgba(0, 212, 255, 0.2)" }}
                     className="px-3 py-1.5 text-sm bg-white/5 rounded-lg border border-white/10 hover:border-cyan-500/30 transition-colors cursor-default"
