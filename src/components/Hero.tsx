@@ -19,7 +19,7 @@ export default function Hero() {
           className="mb-6"
         >
           <span className="px-4 py-2 rounded-full text-sm font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-            Cloud & AI Engineer
+            Azure Cloud & AI Engineer @ Symcor
           </span>
         </motion.div>
 
@@ -39,7 +39,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-8"
         >
-          Building secure, production-grade AI systems.
+          Building secure, production-grade AI & cloud systems.
           <br />
           <span className="text-cyan-400">Toronto, Canada 🇨🇦</span>
         </motion.p>

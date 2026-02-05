@@ -11,18 +11,21 @@ const socials = [
     icon: Linkedin,
     url: "https://www.linkedin.com/in/harnoors",
     color: "#0A66C2",
+    label: "Connect with me",
   },
   {
     name: "GitHub",
     icon: Github,
     url: "https://github.com/harnoorDev",
     color: "#ffffff",
+    label: "See my code",
   },
   {
     name: "Email",
     icon: Mail,
-    url: "mailto:hello@harnoor.dev",
+    url: "mailto:harnoor24@outlook.com",
     color: "#00d4ff",
+    label: "Send me an email",
   },
 ];
 
@@ -42,11 +45,11 @@ export default function Contact() {
             Let&apos;s <span className="gradient-text">Connect</span>
           </h2>
           <p className="text-gray-400 text-lg mb-4">
-            Open to discussing AI projects, collaborations, or just geeking out about tech.
+            Open to discussing AI projects, cloud architecture, security, or just geeking out about tech.
           </p>
           <div className="flex items-center justify-center gap-2 text-gray-500 mb-12">
             <MapPin className="w-4 h-4" />
-            <span>Toronto, Canada</span>
+            <span>Greater Toronto Area, Canada</span>
           </div>
         </motion.div>
 
@@ -54,7 +57,7 @@ export default function Contact() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex justify-center gap-6"
+          className="flex justify-center gap-8"
         >
           {socials.map((social, index) => (
             <motion.a
@@ -67,13 +70,15 @@ export default function Contact() {
               transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
               whileHover={{ scale: 1.1, y: -5 }}
               whileTap={{ scale: 0.95 }}
-              className="glass-card p-4 group"
+              className="glass-card p-6 group flex flex-col items-center gap-3"
             >
               <social.icon
-                className="w-8 h-8 transition-colors"
+                className="w-10 h-10 transition-colors"
                 style={{ color: social.color }}
               />
-              <span className="sr-only">{social.name}</span>
+              <span className="text-sm text-gray-400 group-hover:text-white transition-colors">
+                {social.label}
+              </span>
             </motion.a>
           ))}
         </motion.div>
@@ -82,6 +87,19 @@ export default function Contact() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.6 }}
+          className="mt-16 p-6 glass-card"
+        >
+          <p className="text-gray-400">
+            Currently working as an <span className="text-cyan-400">Azure Cloud Engineer at Symcor</span>
+            <br />
+            <span className="text-sm text-gray-500">500+ connections on LinkedIn</span>
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.8 }}
           className="mt-24 pt-8 border-t border-white/10"
         >
           <p className="text-gray-500 text-sm">

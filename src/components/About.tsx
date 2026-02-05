@@ -3,28 +3,38 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Shield, Cloud, Brain, Lock } from "lucide-react";
+import { Shield, Cloud, Brain, Lock, Briefcase, GraduationCap } from "lucide-react";
 
 const highlights = [
   {
+    icon: Briefcase,
+    title: "Azure Cloud Engineer",
+    description: "Currently at Symcor, implementing secure cloud infrastructure and automation",
+  },
+  {
     icon: Brain,
     title: "AI Engineering",
-    description: "Designing and deploying intelligent systems with LLMs and ML",
+    description: "Designing and deploying intelligent systems with LLMs and ML pipelines",
   },
   {
     icon: Cloud,
     title: "Cloud Architecture",
-    description: "Scalable solutions on Azure, AWS, and modern cloud platforms",
+    description: "Scalable solutions on Azure & AWS with Docker, Kubernetes, and Terraform",
   },
   {
     icon: Shield,
     title: "AI Security",
-    description: "Securing LLM applications against OWASP top 10 risks",
+    description: "Securing LLM applications against OWASP top 10 risks and backdoor attacks",
   },
   {
     icon: Lock,
     title: "Production-Grade",
     description: "Building robust, secure systems ready for enterprise deployment",
+  },
+  {
+    icon: GraduationCap,
+    title: "Sheridan College",
+    description: "Foundation in software development and cloud technologies",
   },
 ];
 
@@ -45,12 +55,12 @@ export default function About() {
             About <span className="gradient-text">Me</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Cloud & AI Engineer with a passion for building secure, intelligent systems
-            that solve real-world problems.
+            Cloud & AI Engineer with a passion for building secure, intelligent systems.
+            Currently crafting cloud solutions at Symcor while exploring the cutting edge of AI security.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {highlights.map((item, index) => (
             <motion.div
               key={item.title}

@@ -7,27 +7,35 @@ import { useRef } from "react";
 const skillCategories = [
   {
     title: "Languages",
-    skills: ["Python", "TypeScript", "JavaScript", "Java", "C#", "SQL"],
+    skills: ["Python", "C#", "TypeScript", "JavaScript", "Java", "C++", "Kotlin", "SQL", "PowerShell"],
   },
   {
     title: "AI & ML",
-    skills: ["LangChain", "OpenAI", "PyTorch", "TensorFlow", "Hugging Face", "RAG"],
+    skills: ["LangChain", "OpenAI", "PyTorch", "TensorFlow", "Hugging Face", "RAG", "Vector DBs", "LLM Security"],
   },
   {
-    title: "Cloud & DevOps",
-    skills: ["Azure", "AWS", "Docker", "Kubernetes", "Terraform", "CI/CD"],
+    title: "Cloud Platforms",
+    skills: ["Microsoft Azure", "AWS", "Azure Functions", "App Service", "Azure AD", "Azure Sentinel", "Log Analytics"],
+  },
+  {
+    title: "DevOps & Infra",
+    skills: ["Docker", "Kubernetes", "Terraform", "CI/CD", "GitHub Actions", "Azure DevOps", "Infrastructure as Code"],
   },
   {
     title: "Frameworks",
-    skills: ["Next.js", "React", "Node.js", ".NET", "Spring Boot", "FastAPI"],
+    skills: [".NET Core", "ASP.NET MVC", "Node.js", "Next.js", "React", "Spring Boot", "FastAPI", "Express.js"],
   },
   {
     title: "Databases",
-    skills: ["PostgreSQL", "MongoDB", "Redis", "Azure SQL", "Vector DBs", "Pinecone"],
+    skills: ["Azure SQL", "PostgreSQL", "MongoDB", "Redis", "Pinecone", "CosmosDB", "SQL Server"],
   },
   {
     title: "Security",
-    skills: ["OWASP", "OAuth/OIDC", "Azure AD", "Prompt Injection", "LLM Security", "CCNA"],
+    skills: ["OWASP Top 10", "OAuth 2.0", "OpenID Connect", "Azure AD Auth", "LLM Security", "Prompt Injection Defense"],
+  },
+  {
+    title: "Certifications",
+    skills: ["Microsoft Azure (4x)", "CCNA (Cisco)", "CompTIA", "Oracle"],
   },
 ];
 
@@ -48,11 +56,11 @@ export default function Skills() {
             Technical <span className="gradient-text">Skills</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            A comprehensive toolkit for building modern AI-powered applications
+            A comprehensive toolkit for building modern cloud infrastructure and AI-powered applications
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {skillCategories.map((category, catIndex) => (
             <motion.div
               key={category.title}
@@ -72,7 +80,7 @@ export default function Skills() {
                     animate={isInView ? { opacity: 1, scale: 1 } : {}}
                     transition={{
                       duration: 0.4,
-                      delay: catIndex * 0.1 + skillIndex * 0.05,
+                      delay: catIndex * 0.1 + skillIndex * 0.03,
                     }}
                     whileHover={{ scale: 1.05, backgroundColor: "rgba(0, 212, 255, 0.2)" }}
                     className="px-3 py-1.5 text-sm bg-white/5 rounded-lg border border-white/10 hover:border-cyan-500/30 transition-colors cursor-default"
