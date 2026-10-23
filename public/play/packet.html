@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PACKET — Harnoor Singh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0a08;
+    --bg-elev: #14110d;
+    --bg-card: #1a1612;
+    --ink: #f0eadb;
+    --ink-soft: #b8ad97;
+    --ink-mute: #6f6759;
+    --ink-faint: #423d34;
+    --rule: #2a2420;
+    --rule-hi: #3a322c;
+    --brand: #ff5722;       /* threat / firewall */
+    --you: #60a5fa;         /* the packet (player) */
+    --data: #4ade80;        /* collectible */
+    --display: 'Geist', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding: 24px;
+    overflow: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 87, 34, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 110%, rgba(96, 165, 250, 0.05) 0%, transparent 60%);
+  }
+
+  .shell {
+    position: relative;
+    width: min(560px, 100%);
+    aspect-ratio: 3 / 4;
+    max-height: calc(100dvh - 96px);
+    background: var(--bg-elev);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 40px 120px -40px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.01);
+  }
+
+  /* corner label, echoing the site's FIG. plates */
+  .shell::before {
+    content: "PROC · 07 / PACKET.RUN";
+    position: absolute; top: 12px; left: 14px; z-index: 6;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    color: var(--ink-mute); font-weight: 600; pointer-events: none;
+  }
+
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+  /* ---------- HUD (crisp DOM text over the motion-blurred canvas) ---------- */
+  .hud {
+    position: absolute; inset: 0; z-index: 5;
+    pointer-events: none;
+    padding: 34px 16px 16px;
+    display: flex; flex-direction: column;
+  }
+  .hud-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .stat { font-family: var(--mono); }
+  .stat--best { text-align: right; }
+  .stat-label {
+    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 600; margin-bottom: 2px;
+  }
+  .stat-val {
+    font-size: 26px; font-weight: 700; color: var(--ink);
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .stat--best .stat-val { color: var(--ink-soft); font-size: 18px; }
+
+  .combo {
+    margin-top: auto; align-self: center;
+    font-family: var(--mono); font-weight: 700;
+    font-size: 13px; letter-spacing: 0.12em;
+    color: var(--data);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 140ms ease, transform 140ms ease;
+    text-shadow: 0 0 16px rgba(74,222,128,0.5);
+  }
+  .combo.show { opacity: 1; transform: translateY(0); }
+
+  /* ---------- overlays ---------- */
+  .overlay {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 32px;
+    background: radial-gradient(ellipse at center, rgba(12,10,8,0.72) 0%, rgba(12,10,8,0.92) 100%);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    transition: opacity 260ms ease;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--brand); font-weight: 700;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  }
+  .eyebrow::before, .eyebrow::after { content: ""; width: 20px; height: 1px; background: var(--brand); opacity: 0.6; }
+
+  .title {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(52px, 15vw, 82px); line-height: 0.88;
+    letter-spacing: -0.045em; color: var(--ink); margin-bottom: 18px;
+  }
+  .title .glyph { color: var(--you); }
+
+  .lede {
+    font-size: 14.5px; line-height: 1.55; color: var(--ink-soft);
+    max-width: 320px; margin-bottom: 26px; text-wrap: balance;
+  }
+  .lede b { color: var(--ink); font-weight: 600; }
+  .legend {
+    display: flex; gap: 18px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-soft);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.you  { background: var(--you);  box-shadow: 0 0 10px var(--you); }
+  .dot.data { background: var(--data); box-shadow: 0 0 10px var(--data); }
+  .dot.fw   { background: var(--brand);box-shadow: 0 0 10px var(--brand); }
+
+  .btn {
+    pointer-events: auto; cursor: pointer;
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #0c0a08; background: var(--you);
+    border: none; border-radius: 5px; padding: 15px 30px;
+    transition: transform 150ms cubic-bezier(0.2,0,0,1), background-color 150ms ease, box-shadow 150ms ease;
+    box-shadow: 0 0 0 rgba(96,165,250,0);
+  }
+  .btn:hover { background: #7db5fb; transform: translateY(-2px); box-shadow: 0 12px 30px -10px rgba(96,165,250,0.6); }
+  .btn:active { transform: translateY(0) scale(0.97); }
+  .btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .hint { margin-top: 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ink-faint); }
+
+  /* game-over result */
+  .result-score {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(60px, 18vw, 92px); line-height: 0.9;
+    letter-spacing: -0.04em; color: var(--you); margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .result-sub {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px;
+  }
+  .result-best { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-bottom: 28px; letter-spacing: 0.08em; }
+  .result-best b { color: var(--data); }
+  .newbest { color: var(--data) !important; text-shadow: 0 0 14px rgba(74,222,128,0.5); }
+
+  /* mute toggle */
+  .mute {
+    position: absolute; top: 10px; right: 12px; z-index: 11;
+    pointer-events: auto; cursor: pointer;
+    width: 32px; height: 32px; border-radius: 5px;
+    background: rgba(26,22,18,0.6); border: 1px solid var(--rule);
+    color: var(--ink-mute); font-family: var(--mono); font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 150ms ease, border-color 150ms ease;
+  }
+  .mute:hover { color: var(--ink); border-color: var(--rule-hi); }
+  .mute:focus-visible { outline: 2px solid var(--you); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .combo, .overlay { transition: none; }
+  }
+  .backlink{position:fixed; left:50%; bottom:15px; transform:translateX(-50%); z-index:60; font-family:var(--mono); font-size:11px; letter-spacing:0.12em; color:var(--ink-mute); text-decoration:none; padding:6px 12px; border-radius:6px; transition:color 150ms ease;}
+  .backlink:hover{color:var(--ink);}
+</style>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>@view-transition { navigation: auto; }</style>
+</head>
+<body>
+  <a class="backlink" href="/play">‹ arcade</a>
+  <div class="shell" id="shell">
+    <canvas id="c"></canvas>
+
+    <button class="mute" id="mute" aria-label="Toggle sound">♪</button>
+
+    <div class="hud" aria-hidden="true">
+      <div class="hud-top">
+        <div class="stat">
+          <div class="stat-label">Score</div>
+          <div class="stat-val" id="score">0</div>
+        </div>
+        <div class="stat stat--best">
+          <div class="stat-label">Best</div>
+          <div class="stat-val" id="best">0</div>
+        </div>
+      </div>
+      <div class="combo" id="combo">×2 UPLINK</div>
+    </div>
+
+    <!-- START -->
+    <div class="overlay" id="startScreen">
+      <div class="eyebrow">Field Notes · Interactive</div>
+      <h1 class="title">PA<span class="glyph">C</span>KET</h1>
+      <p class="lede">You're a packet routing through a hostile network. <b>Move to steer</b>, grab data, and don't touch the firewall.</p>
+      <div class="legend">
+        <span><i class="dot you"></i> you</span>
+        <span><i class="dot data"></i> data</span>
+        <span><i class="dot fw"></i> firewall</span>
+      </div>
+      <button class="btn" id="startBtn">Establish connection</button>
+      <div class="hint">move: mouse / finger &nbsp;·&nbsp; start: space</div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div class="overlay hidden" id="overScreen">
+      <div class="result-sub" id="overReason">Connection lost</div>
+      <div class="result-score" id="finalScore">0</div>
+      <div class="result-best" id="bestLine">Best <b id="bestVal">0</b></div>
+      <button class="btn" id="againBtn">Reconnect</button>
+      <div class="hint">restart: space</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const shell = document.getElementById('shell');
+
+  const scoreEl = document.getElementById('score');
+  const bestEl  = document.getElementById('best');
+  const comboEl = document.getElementById('combo');
+  const startScreen = document.getElementById('startScreen');
+  const overScreen  = document.getElementById('overScreen');
+  const startBtn = document.getElementById('startBtn');
+  const againBtn = document.getElementById('againBtn');
+  const finalScore = document.getElementById('finalScore');
+  const bestLine = document.getElementById('bestLine');
+  const bestVal = document.getElementById('bestVal');
+  const overReason = document.getElementById('overReason');
+  const muteBtn = document.getElementById('mute');
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- persistent best (defensive: works on the live site, degrades to
+  //      session-only inside sandboxes where storage is blocked) ----
+  let best = 0;
+  try { const v = localStorage.getItem('packet_best'); if (v) best = +v || 0; } catch (e) {}
+  const saveBest = () => { try { localStorage.setItem('packet_best', String(best)); } catch (e) {} };
+  bestEl.textContent = best;
+
+  // ---- sizing (DPR-aware; all game logic runs in CSS pixels) ----
+  let W = 0, H = 0, dpr = 1;
+  function resize() {
+    const r = shell.getBoundingClientRect();
+    W = r.width; H = r.height;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (player) { player.x = clamp(player.x, 0, W); player.y = clamp(player.y, 0, H); }
+  }
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+  const rand  = (a, b) => a + Math.random() * (b - a);
+  const dist2 = (ax, ay, bx, by) => { const dx = ax - bx, dy = ay - by; return dx*dx + dy*dy; };
+
+  // ---- tiny WebAudio SFX (no assets) ----
+  let audio = null, muted = false;
+  function ac() {
+    if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audio = null; } }
+    return audio;
+  }
+  function beep(freq, dur, type = 'sine', vol = 0.12) {
+    if (muted) return; const a = ac(); if (!a) return;
+    if (a.state === 'suspended') a.resume();
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, a.currentTime);
+    g.gain.linearRampToValueAtTime(vol, a.currentTime + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(); o.stop(a.currentTime + dur + 0.02);
+  }
+  const sfxData  = (n) => beep(520 + Math.min(n, 12) * 55, 0.12, 'triangle', 0.10);
+  const sfxDeath = () => { beep(180, 0.35, 'sawtooth', 0.16); setTimeout(() => beep(90, 0.5, 'sine', 0.14), 60); };
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? '×' : '♪';
+    muteBtn.style.color = muted ? 'var(--brand)' : '';
+  });
+
+  // ---- entities ----
+  let player = null;
+  let threats = [], packets = [], parts = [];
+  let state = 'start';     // 'start' | 'play' | 'over'
+  let score = 0, displayScore = 0, mult = 1, collected = 0;
+  let elapsed = 0, spawnT = 0, packetT = 0, shake = 0, comboTimer = 0;
+  let target = { x: 0, y: 0 };
+
+  function reset() {
+    player = { x: W / 2, y: H * 0.7, r: 9, trail: [] };
+    target = { x: player.x, y: player.y };
+    threats = []; packets = []; parts = [];
+    score = 0; displayScore = 0; mult = 1; collected = 0;
+    elapsed = 0; spawnT = 0.6; packetT = 0.4; shake = 0; comboTimer = 0;
+    // seed a couple of data bits so there's something to grab immediately
+    for (let i = 0; i < 3; i++) spawnPacket();
+  }
+
+  function spawnThreat() {
+    // spawn just outside a random edge, aim across the field
+    const edge = (Math.random() * 4) | 0;
+    let x, y;
+    if (edge === 0) { x = rand(0, W); y = -20; }
+    else if (edge === 1) { x = W + 20; y = rand(0, H); }
+    else if (edge === 2) { x = rand(0, W); y = H + 20; }
+    else { x = -20; y = rand(0, H); }
+    // aim toward a point in the central area for fair, crossing paths
+    const tx = rand(W * 0.2, W * 0.8), ty = rand(H * 0.2, H * 0.8);
+    const ang = Math.atan2(ty - y, tx - x);
+    const speed = rand(70, 120) * (1 + elapsed * 0.028);
+    const homing = elapsed > 12 && Math.random() < 0.28;
+    threats.push({
+      x, y, r: rand(9, 15),
+      vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed,
+      spin: rand(0, Math.PI * 2), spinV: rand(-3, 3),
+      homing, pulse: rand(0, Math.PI * 2), life: 0
+    });
+  }
+
+  function spawnPacket() {
+    packets.push({
+      x: rand(W * 0.12, W * 0.88), y: rand(H * 0.12, H * 0.88),
+      r: 6.5, born: 0, bob: rand(0, Math.PI * 2)
+    });
+  }
+
+  function burst(x, y, color, n, spd) {
+    if (reduceMotion) n = Math.min(n, 6);
+    for (let i = 0; i < n; i++) {
+      const a = rand(0, Math.PI * 2), s = rand(spd * 0.3, spd);
+      parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, r: rand(1.5, 3.5), color });
+    }
+  }
+
+  function showCombo() {
+    comboEl.textContent = '×' + mult + ' UPLINK';
+    comboEl.classList.add('show');
+    comboTimer = 1.4;
+  }
+
+  // ---- input ----
+  function setTargetFromEvent(clientX, clientY) {
+    const r = shell.getBoundingClientRect();
+    target.x = clamp(clientX - r.left, 0, W);
+    target.y = clamp(clientY - r.top, 0, H);
+  }
+  canvas.addEventListener('mousemove', (e) => { if (state === 'play') setTargetFromEvent(e.clientX, e.clientY); });
+  canvas.addEventListener('touchmove', (e) => {
+    if (state === 'play') { e.preventDefault(); const t = e.touches[0]; setTargetFromEvent(t.clientX, t.clientY); }
+  }, { passive: false });
+  canvas.addEventListener('touchstart', (e) => {
+    if (state === 'play') { const t = e.touches[0]; setTargetFromEvent(t.clientX, t.clientY); }
+  }, { passive: true });
+
+  function begin() {
+    resize(); reset(); state = 'play';
+    startScreen.classList.add('hidden');
+    overScreen.classList.add('hidden');
+    ac(); // unlock audio on the user gesture
+  }
+  function gameOver() {
+    state = 'over';
+    shake = reduceMotion ? 6 : 22;
+    burst(player.x, player.y, '#60a5fa', 34, 320);
+    burst(player.x, player.y, '#ff5722', 18, 240);
+    sfxDeath();
+    const s = Math.floor(score);
+    finalScore.textContent = s;
+    const isNew = s > best;
+    if (isNew) { best = s; saveBest(); bestEl.textContent = best; }
+    bestVal.textContent = best;
+    overReason.textContent = collected >= 20 ? 'Firewall intercept' : 'Connection lost';
+    bestLine.classList.toggle('newbest', isNew);
+    bestLine.innerHTML = isNew ? 'New best' : 'Best <b id="bestVal">' + best + '</b>';
+    setTimeout(() => overScreen.classList.remove('hidden'), 520);
+  }
+
+  startBtn.addEventListener('click', begin);
+  againBtn.addEventListener('click', begin);
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      if (state !== 'play') begin();
+    }
+  });
+  window.addEventListener('resize', resize);
+  window.addEventListener('blur', () => { /* keep state; loop naturally idles */ });
+
+  // ---- update ----
+  function update(dt) {
+    elapsed += dt;
+
+    // player follow (frame-rate independent easing)
+    const k = Math.min(1, dt * 13);
+    player.x += (target.x - player.x) * k;
+    player.y += (target.y - player.y) * k;
+    player.trail.push({ x: player.x, y: player.y });
+    if (player.trail.length > 14) player.trail.shift();
+
+    // score accrues with uptime, scaled by combo
+    score += dt * 10 * mult;
+
+    // spawn threats, ramping
+    spawnT -= dt;
+    const interval = Math.max(0.42, 1.2 - elapsed * 0.02);
+    if (spawnT <= 0) { spawnThreat(); spawnT = interval; }
+
+    // keep a few data bits around
+    packetT -= dt;
+    if (packetT <= 0 && packets.length < 5) { spawnPacket(); packetT = rand(0.8, 1.6); }
+
+    // threats
+    for (let i = threats.length - 1; i >= 0; i--) {
+      const t = threats[i];
+      t.life += dt;
+      if (t.homing) {
+        const ang = Math.atan2(player.y - t.y, player.x - t.x);
+        const cur = Math.atan2(t.vy, t.vx);
+        let d = ang - cur;
+        while (d > Math.PI) d -= Math.PI * 2;
+        while (d < -Math.PI) d += Math.PI * 2;
+        const turn = Math.min(Math.abs(d), 1.6 * dt) * Math.sign(d);
+        const sp = Math.hypot(t.vx, t.vy);
+        const na = cur + turn;
+        t.vx = Math.cos(na) * sp; t.vy = Math.sin(na) * sp;
+      }
+      t.x += t.vx * dt; t.y += t.vy * dt;
+      t.spin += t.spinV * dt; t.pulse += dt * 4;
+      // cull once well off-field
+      if (t.x < -60 || t.x > W + 60 || t.y < -60 || t.y > H + 60) { threats.splice(i, 1); continue; }
+      // collision (forgiving: hit radii smaller than the visual)
+      const hit = (player.r - 2) + (t.r - 3);
+      if (dist2(player.x, player.y, t.x, t.y) < hit * hit) { gameOver(); return; }
+    }
+
+    // packets
+    for (let i = packets.length - 1; i >= 0; i--) {
+      const p = packets[i];
+      p.born += dt; p.bob += dt * 3;
+      const grab = player.r + p.r + 6;
+      if (dist2(player.x, player.y, p.x, p.y) < grab * grab) {
+        packets.splice(i, 1);
+        collected++;
+        mult = Math.min(9, mult + 1);
+        score += 25 * mult;
+        showCombo();
+        burst(p.x, p.y, '#4ade80', 12, 160);
+        sfxData(mult);
+      }
+    }
+
+    // combo decays if you go too long without collecting
+    comboTimer -= dt;
+    if (comboTimer <= 0 && mult > 1) {
+      // grace: only drop the multiplier, don't nuke it, and refresh the timer
+      mult = Math.max(1, mult - 1);
+      comboTimer = 1.4;
+      if (mult === 1) comboEl.classList.remove('show');
+      else comboEl.textContent = '×' + mult + ' UPLINK';
+    }
+
+    // particles
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= 0.92; p.vy *= 0.92;
+      p.life -= dt * 1.6;
+      if (p.life <= 0) parts.splice(i, 1);
+    }
+
+    if (shake > 0) shake = Math.max(0, shake - dt * 60);
+
+    // smooth the HUD number
+    displayScore += (score - displayScore) * Math.min(1, dt * 8);
+    scoreEl.textContent = Math.floor(displayScore);
+  }
+
+  // ---- ambient drift for the start/over screens (feels alive) ----
+  function ambient(dt) {
+    if (Math.random() < dt * 1.5 && threats.length < 8) {
+      const y = rand(0, H);
+      threats.push({
+        x: -20, y, r: rand(8, 14),
+        vx: rand(30, 70), vy: rand(-10, 10),
+        spin: rand(0, 6.28), spinV: rand(-2, 2), homing: false, pulse: rand(0, 6.28), life: 0
+      });
+    }
+    for (let i = threats.length - 1; i >= 0; i--) {
+      const t = threats[i]; t.x += t.vx * dt; t.y += t.vy * dt; t.spin += t.spinV * dt; t.pulse += dt * 4;
+      if (t.x > W + 60) threats.splice(i, 1);
+    }
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.92; p.vy *= 0.92; p.life -= dt * 1.6;
+      if (p.life <= 0) parts.splice(i, 1);
+    }
+  }
+
+  // ---- draw ----
+  function drawGrid() {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.022)';
+    ctx.lineWidth = 1;
+    const step = 34;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let y = 0; y <= H; y += step) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function poly(x, y, r, sides, rot) {
+    ctx.beginPath();
+    for (let i = 0; i < sides; i++) {
+      const a = rot + (i / sides) * Math.PI * 2;
+      const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
+
+  function render() {
+    // motion-blur clear → everything leaves a neon trail
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = 'rgba(12,10,8,0.28)';
+    ctx.fillRect(0, 0, W, H);
+
+    // screen shake
+    if (shake > 0) {
+      const s = shake * 0.5;
+      ctx.translate(rand(-s, s), rand(-s, s));
+    }
+
+    drawGrid();
+    ctx.globalCompositeOperation = 'lighter';
+
+    // packets (data) — spinning green diamonds
+    for (const p of packets) {
+      const pr = p.r + Math.sin(p.bob) * 1.2;
+      ctx.save();
+      ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 16;
+      ctx.fillStyle = 'rgba(74,222,128,0.9)';
+      poly(p.x, p.y, pr, 4, p.born * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    // threats (firewall) — spinning orange shards
+    for (const t of threats) {
+      const pr = t.r + Math.sin(t.pulse) * 1.5;
+      ctx.save();
+      ctx.shadowColor = '#ff5722'; ctx.shadowBlur = 18;
+      ctx.fillStyle = 'rgba(255,87,34,0.92)';
+      poly(t.x, t.y, pr, 3, t.spin); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,150,110,0.7)'; ctx.lineWidth = 1.4;
+      poly(t.x, t.y, pr + 2.5, 3, t.spin); ctx.stroke();
+      ctx.restore();
+    }
+
+    // particles
+    for (const p of parts) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color; ctx.shadowColor = p.color; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    // player (only while there's a live packet)
+    if (player && state !== 'start') {
+      // trail
+      for (let i = 0; i < player.trail.length; i++) {
+        const tp = player.trail[i];
+        const a = (i / player.trail.length) * 0.5;
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.fillStyle = '#60a5fa'; ctx.shadowColor = '#60a5fa'; ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.arc(tp.x, tp.y, player.r * (i / player.trail.length), 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+      // core
+      ctx.save();
+      ctx.shadowColor = '#60a5fa'; ctx.shadowBlur = 24;
+      ctx.fillStyle = '#bcd9fb';
+      ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#eaf3ff';
+      ctx.beginPath(); ctx.arc(player.x, player.y, player.r * 0.45, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // ---- main loop ----
+  let last = performance.now();
+  function frame(now) {
+    let dt = (now - last) / 1000; last = now;
+    if (dt > 0.05) dt = 0.05; // clamp big gaps (tab switches)
+
+    if (state === 'play') update(dt);
+    else ambient(dt);
+
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  resize();
+  // idle player dot lives center-ish so ambient screens look composed
+  player = { x: W / 2, y: H * 0.7, r: 9, trail: [] };
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

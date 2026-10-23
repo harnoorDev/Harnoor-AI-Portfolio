@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# iamharnoor.com · v4
 
-## Getting Started
+Harnoor Singh's portfolio. A static site with a cinematic motion layer, plus one
+Vercel function that powers the live "jailbreak a toy banking agent" demo.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **No build step.** Plain HTML/CSS/ES modules served from `public/`.
+- **Motion:** GSAP 3.15 (ScrollTrigger + SplitText) and Lenis 1.3 smooth scroll,
+  vendored under `public/assets/vendor/` (versioned paths, cached immutably).
+- **WebGL ink:** `public/assets/js/fluid.js`, a stable-fluids solver (curl,
+  vorticity, Jacobi pressure, advection) with a shaded display pass. It runs only
+  while the hero or contact section is on screen, pauses when the tab is hidden,
+  and falls back to a static gradient without WebGL or with reduced motion.
+- **API:** `api/probe.mjs` calls Claude behind a hardened system prompt.
+
+## Layout
+
+```
+api/probe.mjs                 live demo backend (Vercel Node function)
+public/index.html             home page
+public/assets/css/site.css    design tokens + all styles
+public/assets/js/theme-init.js  pre-paint theme/accent + failsafes
+public/assets/js/main.js      motion system, palette, cursor, sections
+public/assets/js/fluid.js     WebGL fluid simulation
+public/assets/js/playground.js  demo console + offline simulated agent
+public/writing/…              Field Notes 001 (unchanged)
+public/play/…                 Arcade (Packet is live; Triage + Agent Loop marked "soon")
+scripts/dev-server.mjs        local server mirroring Vercel (clean URLs, headers, /api)
+vercel.json                   static output, clean URLs, security headers
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev        # http://localhost:4173
+npm run dev:mock   # same, with /api/probe faking a live model (UI testing)
+npm run check      # syntax-check all JS
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Turn on the live demo
 
-## Learn More
+Without a key the demo runs a scripted offline agent, so it never errors. To
+use a real model, add these in Vercel → Project → Settings → Environment Variables:
 
-To learn more about Next.js, take a look at the following resources:
+| Name | Value |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | your key (required) |
+| `PROBE_MODEL` | optional, defaults to `claude-haiku-5-5` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Redeploy afterwards. Guards: 1,200-char input cap, 320 output tokens, origin
+allowlist, best-effort per-IP rate limit (8/min). For hard limits, add a Vercel
+Firewall rate-limit rule on `/api/probe` and a spend limit on the Anthropic key.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Hidden extras
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`⌘K` / `/` opens the command palette (navigate, copy email, toggle theme, cycle
+accent colour, replay the intro). The intro plays once per browser session.

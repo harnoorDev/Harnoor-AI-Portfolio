@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Agents Actually Remember — Harnoor Singh</title>
+<meta name="description" content="The popular 4-types memory diagram is taxonomically wrong. The canonical structure is 1 working + 3 long-term subtypes — and one of them is almost always missing. A field-note on agent memory architecture in 2026.">
+<meta name="author" content="Harnoor Singh">
+
+<!-- Open Graph for LinkedIn / sharing -->
+<meta property="og:title" content="How Agents Actually Remember">
+<meta property="og:description" content="The popular 4-types memory diagram is taxonomically wrong. Here's what the canonical taxonomy looks like — and the one memory type almost every infographic forgets.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://iamharnoor.com/writing/how-agents-actually-remember">
+<meta property="og:site_name" content="Harnoor Singh">
+<meta property="article:author" content="Harnoor Singh">
+<meta property="article:section" content="AI Engineering">
+<meta property="article:tag" content="Agentic AI">
+<meta property="article:tag" content="LangGraph">
+<meta property="article:tag" content="LangMem">
+<meta property="article:tag" content="Memory Architecture">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How Agents Actually Remember">
+<meta name="twitter:description" content="The popular 4-types memory diagram is wrong. The canonical taxonomy is 1+3 — and one of them is almost always missing.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,wght@1,300;1,400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0c0a08;
+    --bg-elev: #14110d;
+    --bg-card: #1a1612;
+    --bg-card-hi: #221c17;
+    --ink: #f0eadb;
+    --ink-soft: #b8ad97;
+    --ink-mute: #6f6759;
+    --ink-faint: #423d34;
+    --rule: #2a2420;
+    --rule-soft: #1f1b17;
+    --rule-hi: #3a322c;
+    --brand: #ff5722;
+    --brand-soft: rgba(255, 87, 34, 0.12);
+    --brand-mute: rgba(255, 87, 34, 0.5);
+    --wm: #60a5fa;
+    --wm-soft: rgba(96, 165, 250, 0.12);
+    --sem: #4ade80;
+    --sem-soft: rgba(74, 222, 128, 0.12);
+    --epi: #fb923c;
+    --epi-soft: rgba(251, 146, 60, 0.12);
+    --proc: #c084fc;
+    --proc-soft: rgba(192, 132, 252, 0.12);
+    --warn: #ff5722;
+    --ok: #4ade80;
+    --display: 'Geist', system-ui, sans-serif;
+    --body: 'Geist', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --serif: 'Newsreader', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  ::selection { background: var(--brand); color: #fff; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-feature-settings: "ss01", "ss03", "kern";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    line-height: 1.55;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 87, 34, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 100%, rgba(96, 165, 250, 0.04) 0%, transparent 60%);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.9 0 0 0 0 0.82 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.6;
+    mix-blend-mode: overlay;
+  }
+
+  .scroll-progress {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: transparent; z-index: 100; pointer-events: none;
+  }
+  .scroll-progress::after {
+    content: ""; display: block; height: 100%;
+    width: var(--progress, 0%);
+    background: var(--brand);
+    box-shadow: 0 0 8px rgba(255, 87, 34, 0.5);
+    transition: width 60ms linear;
+  }
+
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    background: rgba(12, 10, 8, 0.7);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 0;
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 32px;
+    display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  }
+  .nav-brand {
+    font-family: var(--display); font-weight: 700; font-size: 14px;
+    letter-spacing: -0.01em; color: var(--ink); text-decoration: none;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .nav-brand .dot {
+    width: 7px; height: 7px; background: var(--brand); border-radius: 50%;
+    display: inline-block; box-shadow: 0 0 8px rgba(255, 87, 34, 0.6);
+  }
+  .nav-brand .role {
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    color: var(--ink-mute); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex; gap: 28px;
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .nav-link { color: var(--ink-soft); text-decoration: none; transition: color 180ms ease; }
+  .nav-link:hover { color: var(--brand); }
+  .nav-back { display: flex; align-items: center; gap: 6px; }
+
+  .page {
+    position: relative; z-index: 2;
+    max-width: 1100px; margin: 0 auto; padding: 56px 32px 96px;
+  }
+
+  .article-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 48px; flex-wrap: wrap; gap: 16px;
+    padding-bottom: 24px; border-bottom: 1px solid var(--rule);
+  }
+  .article-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--brand);
+    display: flex; align-items: center; gap: 12px; font-weight: 600;
+  }
+  .article-tag::before { content: ""; width: 24px; height: 1px; background: var(--brand); }
+  .article-info {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-mute);
+    display: flex; gap: 20px; flex-wrap: wrap;
+  }
+  .article-info span:not(:last-child)::after {
+    content: " ·"; margin-left: 20px; color: var(--ink-faint);
+  }
+
+  .hero { margin-bottom: 56px; }
+  .hero-title {
+    font-family: var(--display); font-weight: 800;
+    font-size: clamp(48px, 9vw, 112px); line-height: 0.92;
+    letter-spacing: -0.04em; color: var(--ink);
+    text-wrap: balance; margin-bottom: 32px;
+  }
+  .hero-title em {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    color: var(--brand); font-size: 0.95em; letter-spacing: -0.02em;
+  }
+  .hero-lede {
+    font-family: var(--body); font-size: clamp(18px, 2vw, 22px);
+    line-height: 1.45; color: var(--ink-soft);
+    text-wrap: balance; max-width: 780px; font-weight: 400;
+  }
+  .hero-lede strong { color: var(--ink); font-weight: 600; }
+  .hero-lede em {
+    font-family: var(--serif); font-style: italic; color: var(--brand); font-weight: 400;
+  }
+
+  .byline {
+    margin-top: 40px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding-top: 24px; border-top: 1px solid var(--rule);
+  }
+  .byline-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand) 0%, #c2410c 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-family: var(--display); font-weight: 700;
+    font-size: 16px; letter-spacing: -0.02em;
+    box-shadow: 0 0 0 1px var(--rule), 0 0 20px rgba(255, 87, 34, 0.2);
+  }
+  .byline-meta { display: flex; flex-direction: column; gap: 2px; }
+  .byline-name {
+    font-family: var(--display); font-weight: 600; font-size: 14px;
+    color: var(--ink); letter-spacing: -0.01em;
+  }
+  .byline-role {
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-mute);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  .hook {
+    margin-top: 64px; padding: 28px 32px;
+    background: var(--bg-elev); border: 1px solid var(--rule);
+    border-left: 3px solid var(--brand); border-radius: 4px; position: relative;
+  }
+  .hook::before {
+    content: "// TL;DR"; position: absolute; top: -10px; left: 24px;
+    background: var(--bg); padding: 0 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    color: var(--brand); font-weight: 700;
+  }
+  .hook p { font-family: var(--body); font-size: 15px; line-height: 1.65; color: var(--ink-soft); }
+  .hook p strong { color: var(--ink); font-weight: 600; }
+  .hook p em { font-family: var(--serif); font-style: italic; color: var(--brand); font-weight: 400; }
+  .hook p + p { margin-top: 10px; }
+
+  .section { padding: 96px 0 32px; border-top: 1px solid var(--rule); margin-top: 64px; }
+  .section-head {
+    display: grid; grid-template-columns: auto 1fr; gap: 32px;
+    align-items: start; margin-bottom: 40px;
+  }
+  .section-num {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.16em; color: var(--brand);
+    padding-top: 14px; white-space: nowrap;
+  }
+  .section-title {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(28px, 4vw, 44px); line-height: 1.05;
+    letter-spacing: -0.025em; color: var(--ink); text-wrap: balance;
+  }
+  .section-title em {
+    font-family: var(--serif); font-style: italic; font-weight: 300; color: var(--brand);
+  }
+  .section-intro {
+    margin-top: 14px; font-family: var(--body); font-size: 17px;
+    line-height: 1.6; color: var(--ink-soft); max-width: 720px;
+  }
+
+  .tax-figure {
+    margin-top: 32px; padding: 40px 28px 32px;
+    background: var(--bg-elev); border: 1px solid var(--rule);
+    border-radius: 6px; position: relative;
+  }
+  .tax-figure::before {
+    content: "FIG. 01 · CANONICAL TAXONOMY";
+    position: absolute; top: -10px; left: 24px;
+    background: var(--bg); padding: 0 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    color: var(--ink-mute); font-weight: 600;
+  }
+  .tax-figure::after {
+    content: "AFTER SUMERS ET AL. · COALA · 2023";
+    position: absolute; top: -10px; right: 24px;
+    background: var(--bg); padding: 0 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    color: var(--ink-faint); font-weight: 500;
+  }
+  .tax-svg { width: 100%; height: auto; display: block; }
+
+  .loop { margin-top: 40px; display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start; }
+  .loop-text { padding-top: 8px; }
+  .loop-text p { font-family: var(--body); font-size: 16px; line-height: 1.65; color: var(--ink-soft); margin-bottom: 16px; }
+  .loop-text p strong { color: var(--ink); font-weight: 600; }
+  .loop-text p em { font-family: var(--serif); font-style: italic; color: var(--brand); }
+  .patterns { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--rule); }
+  .patterns dt {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.18em; color: var(--brand); text-transform: uppercase;
+    margin-top: 16px; margin-bottom: 4px;
+  }
+  .patterns dt:first-child { margin-top: 0; }
+  .patterns dd { font-family: var(--body); font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+  .patterns dd em { font-family: var(--serif); font-style: italic; color: var(--ink-mute); }
+  .loop-figure {
+    background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 32px 24px; position: relative;
+  }
+  .loop-figure::before {
+    content: "FIG. 02 · THE AGENT LOOP";
+    position: absolute; top: -10px; left: 20px;
+    background: var(--bg); padding: 0 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    color: var(--ink-mute); font-weight: 600;
+  }
+  .loop-svg { width: 100%; height: auto; display: block; }
+
+  .mem--wm   { --accent: var(--wm);   --accent-soft: var(--wm-soft); }
+  .mem--sem  { --accent: var(--sem);  --accent-soft: var(--sem-soft); }
+  .mem--epi  { --accent: var(--epi);  --accent-soft: var(--epi-soft); }
+  .mem--proc { --accent: var(--proc); --accent-soft: var(--proc-soft); }
+  .mem .section-num { color: var(--accent); }
+  .mem .section-title em { color: var(--accent); }
+
+  .position-bar {
+    margin-top: 8px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-faint); flex-wrap: wrap;
+  }
+  .position-bar .here { color: var(--accent); font-weight: 700; position: relative; padding-left: 12px; }
+  .position-bar .here::before { content: "▸"; position: absolute; left: 0; }
+
+  .flow-figure {
+    margin-top: 24px; padding: 36px 24px 28px;
+    background: var(--bg-elev); border: 1px solid var(--rule);
+    border-radius: 6px; position: relative;
+  }
+  .flow-figure::before {
+    content: "ARCHITECTURAL FLOW";
+    position: absolute; top: -10px; left: 20px;
+    background: var(--bg); padding: 0 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    color: var(--ink-mute); font-weight: 600;
+  }
+  .flow-figure::after {
+    content: attr(data-id);
+    position: absolute; top: -10px; right: 20px;
+    background: var(--bg); padding: 0 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    color: var(--accent); font-weight: 700;
+  }
+
+  .flow { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; gap: 12px; align-items: center; }
+
+  .node {
+    background: var(--bg-card); border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    padding: 12px 12px 10px; border-radius: 4px; min-height: 88px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), background-color 220ms ease, border-color 220ms ease;
+  }
+  .node:hover { transform: translateY(-2px); background: var(--bg-card-hi); border-color: var(--rule-hi); }
+  .node-tag {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; opacity: 0.85;
+  }
+  .node-title {
+    font-family: var(--display); font-size: 13.5px; font-weight: 500;
+    line-height: 1.3; color: var(--ink); letter-spacing: -0.005em;
+  }
+  .node-title em { font-family: var(--serif); font-style: italic; color: var(--accent); font-weight: 400; }
+  .node.is-terminal { background: var(--accent); border-color: var(--accent); color: #0c0a08; }
+  .node.is-terminal .node-tag { color: rgba(12, 10, 8, 0.75); opacity: 1; }
+  .node.is-terminal .node-title { color: #0c0a08; }
+  .node.is-terminal .node-title em { color: rgba(12, 10, 8, 0.7); }
+  .node.is-memory { background: var(--accent-soft); border-left-width: 3px; }
+
+  .arr { display: flex; align-items: center; justify-content: center; color: var(--accent); height: 100%; position: relative; }
+  .arr-h { min-height: 88px; }
+  .arr-h::before {
+    content: ""; position: absolute; left: 4px; right: 4px;
+    top: 50%; height: 1px; background: var(--accent); opacity: 0.4;
+  }
+  .arr-h .head {
+    width: 0; height: 0;
+    border-left: 6px solid var(--accent);
+    border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+    position: relative; z-index: 1;
+  }
+  .arr-h.rev .head { border-left: none; border-right: 6px solid var(--accent); }
+  .arr-v { min-height: 24px; position: relative; }
+  .arr-v::before {
+    content: ""; position: absolute; top: 2px; bottom: 2px;
+    left: 50%; transform: translateX(-0.5px); width: 1px;
+    background: var(--accent); opacity: 0.4;
+  }
+  .arr-v .head {
+    width: 0; height: 0;
+    border-top: 6px solid var(--accent);
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  }
+
+  .section-body { margin-top: 32px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: start; }
+  .pullquote {
+    font-family: var(--serif); font-style: italic; font-weight: 300;
+    font-size: clamp(20px, 2.4vw, 26px); line-height: 1.3;
+    color: var(--ink); letter-spacing: -0.01em; text-wrap: balance;
+    padding-left: 16px; border-left: 2px solid var(--accent);
+  }
+  .pullquote em { color: var(--accent); font-style: italic; }
+
+  .body-copy { display: flex; flex-direction: column; gap: 14px; }
+  .body-copy p { font-family: var(--body); font-size: 15px; line-height: 1.65; color: var(--ink-soft); text-wrap: pretty; }
+  .body-copy p strong { color: var(--ink); font-weight: 600; }
+  .body-copy p em { font-family: var(--serif); font-style: italic; color: var(--ink); }
+  .body-copy code {
+    font-family: var(--mono); font-size: 13px;
+    background: var(--accent-soft); color: var(--accent);
+    padding: 1px 6px; border-radius: 3px; font-weight: 500;
+  }
+  .specs { margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+  .spec dt {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-mute); margin-bottom: 4px; font-weight: 600;
+  }
+  .spec dd { font-family: var(--body); font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
+
+  .prod-intro { max-width: 740px; }
+  .prod-grid { margin-top: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .prod-card {
+    background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 5px;
+    padding: 22px; display: flex; flex-direction: column; gap: 12px;
+    transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), background-color 220ms ease, border-color 220ms ease;
+  }
+  .prod-card:hover { transform: translateY(-3px); background: var(--bg-card); border-color: var(--rule-hi); }
+  .prod-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+  .prod-name { font-family: var(--display); font-size: 20px; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
+  .prod-name em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+  .prod-type { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 600; white-space: nowrap; }
+  .prod-desc { font-family: var(--body); font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); }
+  .prod-desc em { font-family: var(--serif); font-style: italic; color: var(--ink); }
+  .prod-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+  .prod-tag {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 3px 7px; border-radius: 3px; font-weight: 600;
+  }
+  .prod-tag.wm   { background: var(--wm-soft);   color: var(--wm); }
+  .prod-tag.sem  { background: var(--sem-soft);  color: var(--sem); }
+  .prod-tag.epi  { background: var(--epi-soft);  color: var(--epi); }
+  .prod-tag.proc { background: var(--proc-soft); color: var(--proc); }
+
+  .closing { margin-top: 96px; padding: 56px 0 0; border-top: 1px solid var(--rule); }
+  .closing-title {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(36px, 5vw, 64px); line-height: 1;
+    letter-spacing: -0.03em; color: var(--ink);
+    text-wrap: balance; margin-bottom: 32px;
+  }
+  .closing-title em { font-family: var(--serif); font-style: italic; font-weight: 300; color: var(--brand); }
+  .closing-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 56px; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 20px; border: 1px solid var(--rule); border-radius: 4px;
+    background: var(--bg-elev); color: var(--ink);
+    font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
+    transition: transform 180ms cubic-bezier(0.2, 0, 0, 1), background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  }
+  .cta:hover { background: var(--bg-card); border-color: var(--brand); color: var(--brand); transform: translateY(-1px); }
+  .cta:active { transform: translateY(0) scale(0.98); }
+  .cta-primary { background: var(--brand); border-color: var(--brand); color: #0c0a08; }
+  .cta-primary:hover { background: #ff6f3f; border-color: #ff6f3f; color: #0c0a08; }
+
+  .refs { margin-top: 56px; padding: 24px 28px; background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 5px; }
+  .refs-label { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brand); margin-bottom: 12px; }
+  .refs-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .refs-list li { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+  .refs-list li::before { content: "→ "; color: var(--ink-faint); }
+  .refs-list li em { font-family: var(--serif); font-style: italic; color: var(--ink); }
+
+  .footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+  .footer-left { display: flex; gap: 18px; flex-wrap: wrap; }
+
+  @media (max-width: 900px) {
+    .page { padding: 32px 20px 64px; }
+    .nav-inner { padding: 0 20px; }
+    .nav-links { gap: 16px; font-size: 10px; }
+    .article-meta { flex-direction: column; align-items: flex-start; }
+    .section-head { grid-template-columns: 1fr; gap: 12px; }
+    .section-num { padding-top: 0; }
+    .section { padding: 64px 0 24px; margin-top: 40px; }
+    .loop { grid-template-columns: 1fr; gap: 24px; }
+    .section-body { grid-template-columns: 1fr; gap: 24px; }
+    .pullquote { font-size: 20px; }
+    .flow-figure { padding: 28px 14px 22px; }
+    .flow { grid-template-columns: 1fr 22px 1fr 22px 1fr; gap: 7px; }
+    .node { padding: 10px 9px 8px; min-height: 70px; }
+    .node-title { font-size: 11.5px; line-height: 1.25; }
+    .node-tag { font-size: 8.5px; }
+    .specs { grid-template-columns: 1fr; }
+    .prod-grid { grid-template-columns: 1fr; }
+    .closing-actions { flex-direction: column; }
+    .cta { justify-content: center; }
+  }
+</style>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>@view-transition { navigation: auto; }</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <span class="dot"></span>
+      Harnoor Singh
+      <span class="role">/ Field Notes</span>
+    </a>
+    <div class="nav-links">
+      <a href="/#work" class="nav-link">Work</a>
+      <a href="/#stack" class="nav-link">Stack</a>
+      <a href="/" class="nav-link nav-back">← Portfolio</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <div class="article-meta">
+    <div class="article-tag">
+      <span>Field Notes · 001 / Agent Architecture</span>
+    </div>
+    <div class="article-info">
+      <span>May 2026</span>
+      <span>8 min read</span>
+      <span>Toronto, CA</span>
+    </div>
+  </div>
+
+  <header class="hero">
+    <h1 class="hero-title">
+      How agents<br>
+      <em>actually</em> remember.
+    </h1>
+
+    <p class="hero-lede">
+      The infographic making the rounds on LinkedIn — <strong>short-term, long-term, episodic, semantic as four peer categories</strong> — is taxonomically wrong. The canonical structure is <em>one working memory and three long-term subtypes</em>. And one of them is almost always missing.
+    </p>
+
+    <div class="byline">
+      <div class="byline-avatar">H</div>
+      <div class="byline-meta">
+        <div class="byline-name">Harnoor Singh</div>
+        <div class="byline-role">Sr. Cloud &amp; AI Engineer · Symcor</div>
+      </div>
+    </div>
+  </header>
+
+  <aside class="hook">
+    <p>
+      Every serious source — the <strong>CoALA paper</strong>, LangGraph documentation, IBM, MongoDB, Letta, Mem0 — uses the same <strong>1 + 3</strong> structure: <em>working memory</em> at the top, then long-term memory split into <em>semantic, episodic, and procedural</em>. The "4 parallel types" framing flattens this hierarchy and drops procedural memory entirely.
+    </p>
+    <p>
+      This piece rebuilds the diagram against the canonical taxonomy, restores procedural memory, situates each type inside the agent loop, and names the production systems behind them. Written from the trenches — I ship multi-agent LangGraph systems for Canadian banks and have spent the last year arguing about exactly this with our architecture team.
+    </p>
+  </aside>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-num">001 / TAXONOMY</div>
+      <div>
+        <h2 class="section-title">The taxonomy is a <em>tree</em>, not a row.</h2>
+        <p class="section-intro">
+          Memory in an agent isn't four parallel boxes. It's a hierarchy: one short-term store that lives in the context window, and three long-term subtypes that persist across sessions. Drawing them as peers is the original sin of agent-memory diagrams.
+        </p>
+      </div>
+    </div>
+
+    <figure class="tax-figure">
+      <svg class="tax-svg" viewBox="0 0 1140 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            .tx-line { stroke: #3a322c; stroke-width: 1.5; fill: none; }
+            .tx-box { stroke-width: 1.5; }
+            .tx-root { fill: #1a1612; stroke: #b8ad97; }
+            .tx-wm { fill: #60a5fa; stroke: #60a5fa; }
+            .tx-ltm { fill: #1a1612; stroke: #f0eadb; }
+            .tx-sem { fill: #4ade80; stroke: #4ade80; }
+            .tx-epi { fill: #fb923c; stroke: #fb923c; }
+            .tx-proc { fill: #c084fc; stroke: #c084fc; }
+            .tx-title { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 15px; fill: #0c0a08; }
+            .tx-title-light { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 15px; fill: #f0eadb; }
+            .tx-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em; font-weight: 600; }
+            .tx-sub-dark { fill: rgba(12, 10, 8, 0.75); }
+            .tx-sub-light { fill: #6f6759; }
+            .tx-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; fill: #6f6759; text-transform: uppercase; font-weight: 600; }
+          </style>
+        </defs>
+        <rect x="470" y="20" width="140" height="46" rx="3" class="tx-box tx-root"/>
+        <text x="540" y="42" text-anchor="middle" class="tx-title-light">Memory</text>
+        <text x="540" y="58" text-anchor="middle" class="tx-sub tx-sub-light">CORE COMPONENT</text>
+        <line x1="540" y1="66" x2="540" y2="95" class="tx-line"/>
+        <line x1="240" y1="95" x2="840" y2="95" class="tx-line"/>
+        <line x1="240" y1="95" x2="240" y2="120" class="tx-line"/>
+        <line x1="840" y1="95" x2="840" y2="120" class="tx-line"/>
+        <rect x="120" y="120" width="240" height="56" rx="3" class="tx-box tx-wm"/>
+        <text x="240" y="144" text-anchor="middle" class="tx-title">Working Memory</text>
+        <text x="240" y="162" text-anchor="middle" class="tx-sub tx-sub-dark">SESSION-SCOPED · VOLATILE</text>
+        <rect x="720" y="120" width="240" height="56" rx="3" class="tx-box tx-ltm"/>
+        <text x="840" y="144" text-anchor="middle" class="tx-title-light">Long-Term Memory</text>
+        <text x="840" y="162" text-anchor="middle" class="tx-sub tx-sub-light">PERSISTENT · CROSS-SESSION</text>
+        <line x1="840" y1="176" x2="840" y2="210" class="tx-line"/>
+        <line x1="660" y1="210" x2="1020" y2="210" class="tx-line"/>
+        <line x1="660" y1="210" x2="660" y2="235" class="tx-line"/>
+        <line x1="840" y1="210" x2="840" y2="235" class="tx-line"/>
+        <line x1="1020" y1="210" x2="1020" y2="235" class="tx-line"/>
+        <rect x="580" y="235" width="160" height="56" rx="3" class="tx-box tx-sem"/>
+        <text x="660" y="259" text-anchor="middle" class="tx-title">Semantic</text>
+        <text x="660" y="277" text-anchor="middle" class="tx-sub tx-sub-dark">FACTS · ONTOLOGIES</text>
+        <rect x="760" y="235" width="160" height="56" rx="3" class="tx-box tx-epi"/>
+        <text x="840" y="259" text-anchor="middle" class="tx-title">Episodic</text>
+        <text x="840" y="277" text-anchor="middle" class="tx-sub tx-sub-dark">EVENTS · TIMESTAMPS</text>
+        <rect x="940" y="235" width="160" height="56" rx="3" class="tx-box tx-proc"/>
+        <text x="1020" y="259" text-anchor="middle" class="tx-title">Procedural</text>
+        <text x="1020" y="277" text-anchor="middle" class="tx-sub tx-sub-dark">RULES · WORKFLOWS</text>
+        <text x="1020" y="316" text-anchor="middle" class="tx-label" style="fill: #ff5722; font-weight: 700;">↑ OFTEN OMITTED</text>
+        <text x="240" y="200" text-anchor="middle" class="tx-label">CONTEXT WINDOW · BUFFERS</text>
+      </svg>
+    </figure>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-num">002 / SYSTEM CONTEXT</div>
+      <div>
+        <h2 class="section-title">Memory is <em>one slice</em> of the agent loop.</h2>
+      </div>
+    </div>
+
+    <div class="loop">
+      <div class="loop-text">
+        <p>
+          Memory diagrams in isolation make memory look like the whole system. It isn't. In production, memory is read and written inside a continuous loop alongside <strong>perception, reasoning, planning, tool use, and reflection</strong>. The four memory types describe <em>what</em> is stored. The loop describes <em>when</em> it's read and written.
+        </p>
+        <p>
+          Working memory is loaded at every turn. Long-term memory is queried selectively — semantic for facts, episodic for past attempts, procedural for "how we do things here." Writes happen on the way out, often through a reflection or critique step.
+        </p>
+        <dl class="patterns">
+          <dt>REACT</dt>
+          <dd>Thought → Action → Observation, iteratively. <em>The dominant single-agent pattern.</em></dd>
+          <dt>PLAN-AND-EXECUTE</dt>
+          <dd>Generate a full plan, then execute steps. <em>For long-horizon tasks where premature action is costly.</em></dd>
+          <dt>REFLEXION</dt>
+          <dd>Self-critique after each attempt, write the lesson to memory. <em>The procedural-memory writer.</em></dd>
+          <dt>MCP</dt>
+          <dd>Model Context Protocol — the connector standard for tools and resources in 2026.</dd>
+        </dl>
+      </div>
+
+      <figure class="loop-figure">
+        <svg class="loop-svg" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <style>
+              .lp-circle { fill: none; stroke: #3a322c; stroke-width: 1.5; stroke-dasharray: 3 4; }
+              .lp-node { stroke-width: 1.5; }
+              .lp-node-light { fill: #1a1612; stroke: #b8ad97; }
+              .lp-node-llm { fill: #ff5722; stroke: #ff5722; }
+              .lp-title { font-family: 'Geist', sans-serif; font-weight: 500; font-size: 12px; fill: #f0eadb; }
+              .lp-title-dark { font-family: 'Geist', sans-serif; font-weight: 600; font-size: 12px; fill: #0c0a08; }
+              .lp-tag { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.14em; fill: #6f6759; font-weight: 600; }
+              .lp-tag-dark { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.14em; fill: rgba(12, 10, 8, 0.7); font-weight: 600; }
+            </style>
+            <marker id="arrowend" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L0,8 L6,4 z" fill="#6f6759"/>
+            </marker>
+          </defs>
+          <circle cx="240" cy="240" r="155" class="lp-circle"/>
+          <rect x="180" y="208" width="120" height="64" rx="3" class="lp-node lp-node-llm"/>
+          <text x="240" y="234" text-anchor="middle" class="lp-tag-dark">LLM CORE</text>
+          <text x="240" y="252" text-anchor="middle" class="lp-title-dark">Reason · Plan</text>
+          <text x="240" y="266" text-anchor="middle" class="lp-title-dark">Decide</text>
+          <rect x="180" y="20" width="120" height="50" rx="3" class="lp-node lp-node-light"/>
+          <text x="240" y="38" text-anchor="middle" class="lp-tag">01 · INPUT</text>
+          <text x="240" y="56" text-anchor="middle" class="lp-title">Perception</text>
+          <rect x="385" y="100" width="90" height="50" rx="3" class="lp-node" style="fill: rgba(96, 165, 250, 0.12); stroke: #60a5fa;"/>
+          <text x="430" y="118" text-anchor="middle" class="lp-tag" style="fill: #60a5fa;">WM</text>
+          <text x="430" y="136" text-anchor="middle" class="lp-title">Working</text>
+          <rect x="380" y="320" width="100" height="50" rx="3" class="lp-node lp-node-light"/>
+          <text x="430" y="338" text-anchor="middle" class="lp-tag">04 · ACT</text>
+          <text x="430" y="356" text-anchor="middle" class="lp-title">Tool Use</text>
+          <rect x="180" y="410" width="120" height="50" rx="3" class="lp-node lp-node-light"/>
+          <text x="240" y="428" text-anchor="middle" class="lp-tag">06 · REFLECT</text>
+          <text x="240" y="446" text-anchor="middle" class="lp-title">Critique</text>
+          <rect x="0" y="320" width="100" height="50" rx="3" class="lp-node" style="fill: rgba(192, 132, 252, 0.12); stroke: #c084fc;"/>
+          <text x="50" y="338" text-anchor="middle" class="lp-tag" style="fill: #c084fc;">PROC</text>
+          <text x="50" y="356" text-anchor="middle" class="lp-title">Procedural</text>
+          <rect x="5" y="195" width="90" height="50" rx="3" class="lp-node" style="fill: rgba(74, 222, 128, 0.12); stroke: #4ade80;"/>
+          <text x="50" y="213" text-anchor="middle" class="lp-tag" style="fill: #4ade80;">SEM</text>
+          <text x="50" y="231" text-anchor="middle" class="lp-title">Semantic</text>
+          <rect x="5" y="100" width="90" height="50" rx="3" class="lp-node" style="fill: rgba(251, 146, 60, 0.12); stroke: #fb923c;"/>
+          <text x="50" y="118" text-anchor="middle" class="lp-tag" style="fill: #fb923c;">EPI</text>
+          <text x="50" y="136" text-anchor="middle" class="lp-title">Episodic</text>
+          <line x1="240" y1="72" x2="240" y2="204" stroke="#6f6759" stroke-width="1" marker-end="url(#arrowend)"/>
+          <line x1="300" y1="240" x2="375" y2="340" stroke="#6f6759" stroke-width="1" marker-end="url(#arrowend)"/>
+          <line x1="380" y1="345" x2="305" y2="425" stroke="#6f6759" stroke-width="1" marker-end="url(#arrowend)"/>
+          <line x1="240" y1="408" x2="240" y2="278" stroke="#6f6759" stroke-width="1" marker-end="url(#arrowend)"/>
+          <line x1="178" y1="240" x2="98" y2="218" stroke="#4ade80" stroke-width="1" stroke-dasharray="2 2" opacity="0.7"/>
+          <line x1="178" y1="222" x2="98" y2="130" stroke="#fb923c" stroke-width="1" stroke-dasharray="2 2" opacity="0.7"/>
+          <line x1="178" y1="262" x2="98" y2="340" stroke="#c084fc" stroke-width="1" stroke-dasharray="2 2" opacity="0.7"/>
+          <line x1="305" y1="240" x2="382" y2="128" stroke="#60a5fa" stroke-width="1" stroke-dasharray="2 2" opacity="0.7"/>
+        </svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section mem mem--wm">
+    <div class="section-head">
+      <div class="section-num">003 / WM</div>
+      <div>
+        <h2 class="section-title">Working <em>Memory</em>.</h2>
+        <div class="position-bar">
+          <span class="here">Working</span>
+          <span>Semantic</span>
+          <span>Episodic</span>
+          <span>Procedural</span>
+        </div>
+      </div>
+    </div>
+
+    <figure class="flow-figure" data-id="WM · CONTEXT FLOW">
+      <div class="flow">
+        <div class="node is-terminal"><div class="node-tag"><span>01 · input</span></div><div class="node-title">User Input</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>02 · state</span></div><div class="node-title">Graph State<br>(LangGraph)</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node is-memory"><div class="node-tag"><span>03 · context</span></div><div class="node-title"><em>Context Window</em><br>+ Message Buffer</div></div>
+        <div></div><div></div><div></div><div></div>
+        <div class="arr arr-v"><div class="head"></div></div>
+        <div class="node is-terminal"><div class="node-tag"><span>06 · output</span></div><div class="node-title">Response</div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>05 · ckpt</span></div><div class="node-title">Checkpointer<br><em>(PostgresSaver)</em></div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>04 · reason</span></div><div class="node-title">LLM Inference<br>+ Tool Calls</div></div>
+      </div>
+    </figure>
+
+    <div class="section-body">
+      <blockquote class="pullquote">
+        Thread-scoped state. <em>Lives in the context window</em> and a checkpointer — not a memory database. Cleared at end of thread.
+      </blockquote>
+      <div class="body-copy">
+        <p>
+          Working memory is what the agent currently has in mind. In LangGraph it's literally the graph state — message history, intermediate tool results, scratchpad reasoning — all of which fits in the context window for the duration of one thread. A checkpointer (<code>PostgresSaver</code>, <code>RedisSaver</code>, <code>SqliteSaver</code>) persists this state so an interrupted run can resume, but the scope is still one thread, one task.
+        </p>
+        <p>
+          <strong>A common error</strong> is conflating the checkpointer with long-term memory. Checkpointers handle reliability and time-travel debugging. Long-term memory persists knowledge across threads and users. Both are needed in production. Neither replaces the other.
+        </p>
+        <dl class="specs">
+          <div class="spec"><dt>Implementation</dt><dd>Context window · <code>BaseMessage[]</code> · Redis · Postgres</dd></div>
+          <div class="spec"><dt>Best for</dt><dd>Live conversation · multi-step task state · resumability</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mem mem--sem">
+    <div class="section-head">
+      <div class="section-num">004 / LTM · SEMANTIC</div>
+      <div>
+        <h2 class="section-title">Semantic <em>Memory</em>.</h2>
+        <div class="position-bar">
+          <span>Working</span>
+          <span class="here">Semantic</span>
+          <span>Episodic</span>
+          <span>Procedural</span>
+        </div>
+      </div>
+    </div>
+
+    <figure class="flow-figure" data-id="SEM · RAG FLOW">
+      <div class="flow">
+        <div class="node is-terminal"><div class="node-tag"><span>01 · query</span></div><div class="node-title">User Query</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>02 · embed</span></div><div class="node-title">Embed +<br>Hybrid Search</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node is-memory"><div class="node-tag"><span>03 · store</span></div><div class="node-title"><em>Vector DB</em> +<br>Knowledge Graph</div></div>
+        <div></div><div></div><div></div><div></div>
+        <div class="arr arr-v"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>06 · reason</span></div><div class="node-title">LLM Reasoning</div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>05 · ground</span></div><div class="node-title">Context<br>Grounding</div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node is-memory"><div class="node-tag"><span>04 · retrieve</span></div><div class="node-title"><em>Top-k Facts</em><br>Retrieved</div></div>
+        <div class="arr arr-v"><div class="head"></div></div>
+        <div></div><div></div><div></div><div></div>
+        <div class="node"><div class="node-tag"><span>07 · respond</span></div><div class="node-title">Grounded<br>Response</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node is-terminal"><div class="node-tag"><span>08 · output</span></div><div class="node-title">User Output</div></div>
+        <div></div><div></div><div></div>
+      </div>
+    </figure>
+
+    <div class="section-body">
+      <blockquote class="pullquote">
+        Facts, definitions, and relationships. <em>What things are</em>, independent of when they were learned.
+      </blockquote>
+      <div class="body-copy">
+        <p>
+          Semantic memory is the agent's model of how the world works. User preferences ("Harnoor uses LangGraph"), domain facts ("Toronto is in Ontario"), business rules ("orders over $10k require approval") — anything that's a stable assertion about reality lives here. It's queried by similarity (vector search) or by relationship (graph traversal), often both.
+        </p>
+        <p>
+          The 2026 production trend is <strong>hybrid retrieval</strong>: dense embeddings plus BM25 keyword matching plus entity matching, all fused into one score. Pure vector similarity alone is no longer the default — graph memory has matured into the production stack.
+        </p>
+        <dl class="specs">
+          <div class="spec"><dt>Implementation</dt><dd>Vector DB · knowledge graph · Mem0 · <code>LangMem</code></dd></div>
+          <div class="spec"><dt>Best for</dt><dd>Personalization · factual grounding · policy lookup</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mem mem--epi">
+    <div class="section-head">
+      <div class="section-num">005 / LTM · EPISODIC</div>
+      <div>
+        <h2 class="section-title">Episodic <em>Memory</em>.</h2>
+        <div class="position-bar">
+          <span>Working</span>
+          <span>Semantic</span>
+          <span class="here">Episodic</span>
+          <span>Procedural</span>
+        </div>
+      </div>
+    </div>
+
+    <figure class="flow-figure" data-id="EPI · TEMPORAL RECALL">
+      <div class="flow">
+        <div class="node is-terminal"><div class="node-tag"><span>01 · event</span></div><div class="node-title">Interaction<br>/ Episode</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>02 · capture</span></div><div class="node-title">Context · Time ·<br>Action · Outcome</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node is-memory"><div class="node-tag"><span>03 · store</span></div><div class="node-title"><em>Temporal KG</em><br>/ Episode Store</div></div>
+        <div></div><div></div><div></div><div></div>
+        <div class="arr arr-v"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>06 · adapt</span></div><div class="node-title">Few-Shot<br>Adaptation</div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>05 · recall</span></div><div class="node-title">Similar Episode<br>Retrieved</div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>04 · query</span></div><div class="node-title">Similarity +<br>Temporal Query</div></div>
+        <div class="arr arr-v"><div class="head"></div></div>
+        <div></div><div></div><div></div><div></div>
+        <div class="node"><div class="node-tag"><span>07 · decide</span></div><div class="node-title">Decision<br>(case-based)</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node is-terminal"><div class="node-tag"><span>08 · output</span></div><div class="node-title">Adapted<br>Response</div></div>
+        <div></div><div></div><div></div>
+      </div>
+    </figure>
+
+    <div class="section-body">
+      <blockquote class="pullquote">
+        Past interactions, situated in time. <em>What happened, when, what worked.</em>
+      </blockquote>
+      <div class="body-copy">
+        <p>
+          Episodic memory stores experience. Each episode is a record — context, timestamp, action taken, outcome — and the agent retrieves similar past episodes to inform current decisions. This is <strong>case-based reasoning</strong>: instead of reasoning from first principles every time, the agent asks "have I been here before, and what worked?"
+        </p>
+        <p>
+          Implementation typically combines vector similarity (find episodes like this one) with temporal filters (recent episodes weighted higher). Zep's <strong>Graphiti</strong> and Letta's recall memory are the current production references; LangMem stores episodes as few-shot examples that get injected into prompts at decision points.
+        </p>
+        <dl class="specs">
+          <div class="spec"><dt>Implementation</dt><dd>Zep · Graphiti · Letta recall · time-indexed DB</dd></div>
+          <div class="spec"><dt>Best for</dt><dd>Adaptive behavior · learning from failure · few-shot routing</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mem mem--proc">
+    <div class="section-head">
+      <div class="section-num">006 / LTM · PROCEDURAL <span style="color: var(--brand); margin-left: 8px;">← OFTEN OMITTED</span></div>
+      <div>
+        <h2 class="section-title">Procedural <em>Memory</em>.</h2>
+        <div class="position-bar">
+          <span>Working</span>
+          <span>Semantic</span>
+          <span>Episodic</span>
+          <span class="here">Procedural</span>
+        </div>
+      </div>
+    </div>
+
+    <figure class="flow-figure" data-id="PROC · SELF-UPDATING">
+      <div class="flow">
+        <div class="node is-terminal"><div class="node-tag"><span>01 · run</span></div><div class="node-title">Agent Run</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>02 · execute</span></div><div class="node-title">Tool Use<br>+ Output</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>03 · evaluate</span></div><div class="node-title">Reflexion /<br>Eval Signal</div></div>
+        <div></div><div></div><div></div><div></div>
+        <div class="arr arr-v"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>06 · prompt</span></div><div class="node-title">Updated<br>System Prompt</div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node"><div class="node-tag"><span>05 · optimize</span></div><div class="node-title">Prompt<br>Optimizer</div></div>
+        <div class="arr arr-h rev"><div class="head"></div></div>
+        <div class="node is-memory"><div class="node-tag"><span>04 · store</span></div><div class="node-title"><em>Procedural</em><br>Memory Store</div></div>
+        <div class="arr arr-v"><div class="head"></div></div>
+        <div></div><div></div><div></div><div></div>
+        <div class="node"><div class="node-tag"><span>07 · apply</span></div><div class="node-title">Next Run<br>(improved)</div></div>
+        <div class="arr arr-h"><div class="head"></div></div>
+        <div class="node is-terminal"><div class="node-tag"><span>08 · loop</span></div><div class="node-title">Continuous<br>Improvement</div></div>
+        <div></div><div></div><div></div>
+      </div>
+    </figure>
+
+    <div class="section-body">
+      <blockquote class="pullquote">
+        How the agent <em>operates</em> — rules, workflows, and self-updating system prompts. The memory almost every infographic forgets.
+      </blockquote>
+      <div class="body-copy">
+        <p>
+          Procedural memory is the agent's <strong>skill set</strong> — its workflows, decision policies, and the system prompts that shape its behavior. Unlike semantic memory (facts about the world) or episodic memory (events that happened), procedural memory is <em>how the agent does things</em>: routing rules, error-recovery heuristics, tone, format, escalation policies.
+        </p>
+        <p>
+          The 2026 production pattern, codified by <strong>LangMem</strong>, treats system prompts as procedural memory and lets the agent rewrite them based on feedback. A Reflexion step evaluates the run, a prompt optimizer rewrites the instruction, and the next iteration runs with the improved prompt. This is how agents get measurably better <em>without retraining the underlying model</em>.
+        </p>
+        <dl class="specs">
+          <div class="spec"><dt>Implementation</dt><dd>LangMem procedural · self-updating system prompts · Letta core blocks</dd></div>
+          <div class="spec"><dt>Best for</dt><dd>Continuous improvement · learned routing · agent persona</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-num">007 / PRODUCTION</div>
+      <div>
+        <h2 class="section-title">The systems that <em>actually</em> implement this.</h2>
+        <p class="section-intro prod-intro">
+          Six systems cover the production memory landscape in 2026. The right choice depends on whether you own the agent loop, whether memory is load-bearing, and how much control you need over the schema.
+        </p>
+      </div>
+    </div>
+
+    <div class="prod-grid">
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="prod-name"><em>LangMem</em></div>
+          <div class="prod-type">SDK · LANGGRAPH-NATIVE</div>
+        </div>
+        <div class="prod-desc">
+          The canonical implementation of the 1+3 taxonomy. Sits on LangGraph's <code style="background:rgba(255,87,34,0.12);color:var(--brand);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:0.9em">BaseStore</code> and exposes semantic, episodic, and procedural memory through a unified API. My default for teams already on LangGraph.
+        </div>
+        <div class="prod-tags">
+          <span class="prod-tag sem">Semantic</span>
+          <span class="prod-tag epi">Episodic</span>
+          <span class="prod-tag proc">Procedural</span>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="prod-name"><em>Mem0</em></div>
+          <div class="prod-type">CRUD MEMORY LAYER</div>
+        </div>
+        <div class="prod-desc">
+          The most-integrated memory layer in 2026 — covers 21+ frameworks across Python and TypeScript. Framework-agnostic: add it to any agent loop. Multi-signal retrieval (semantic + BM25 + entity matching). The pragmatic default when "remember the user" <em>is</em> the feature.
+        </div>
+        <div class="prod-tags">
+          <span class="prod-tag sem">Semantic</span>
+          <span class="prod-tag epi">Episodic</span>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="prod-name"><em>Letta</em> (formerly MemGPT)</div>
+          <div class="prod-type">SELF-MANAGING RUNTIME</div>
+        </div>
+        <div class="prod-desc">
+          OS-inspired memory: <em>core memory</em> in the context window (RAM), <em>recall memory</em> as searchable history (disk cache), <em>archival memory</em> as long-term tool-queryable store (cold storage). The agent self-edits its memory blocks via tool calls. Pick this when memory <em>is</em> the product.
+        </div>
+        <div class="prod-tags">
+          <span class="prod-tag wm">Working</span>
+          <span class="prod-tag sem">Semantic</span>
+          <span class="prod-tag epi">Episodic</span>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="prod-name"><em>Zep</em> / Graphiti</div>
+          <div class="prod-type">TEMPORAL KNOWLEDGE GRAPH</div>
+        </div>
+        <div class="prod-desc">
+          Episodic memory as a temporal knowledge graph. Every fact carries a timestamp, so the agent knows not just <em>what</em> was true but <em>when</em> it was true — essential when facts change (job titles, prices, policies). Best when the ordering of events matters to reasoning.
+        </div>
+        <div class="prod-tags">
+          <span class="prod-tag epi">Episodic</span>
+          <span class="prod-tag sem">Semantic</span>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="prod-name"><em>LangGraph</em> Checkpointers</div>
+          <div class="prod-type">WORKING MEMORY · PERSISTENCE</div>
+        </div>
+        <div class="prod-desc">
+          <code style="background:rgba(96,165,250,0.12);color:var(--wm);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:0.9em">PostgresSaver</code>, <code style="background:rgba(96,165,250,0.12);color:var(--wm);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:0.9em">RedisSaver</code>, <code style="background:rgba(96,165,250,0.12);color:var(--wm);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:0.9em">SqliteSaver</code> — these persist graph state for resumability and time-travel debugging. <strong>Thread-scoped, not user-scoped.</strong> Do not confuse with long-term memory.
+        </div>
+        <div class="prod-tags">
+          <span class="prod-tag wm">Working</span>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-head">
+          <div class="prod-name"><em>Provider</em> Memory</div>
+          <div class="prod-type">CHATGPT · CLAUDE PROJECTS</div>
+        </div>
+        <div class="prod-desc">
+          Provider-managed memory built into the model platform. Zero effort, zero control — opaque schema, no programmatic query, no migration path. The right choice when the provider <em>is</em> your platform; the wrong choice the moment you need to audit, scope, or move it.
+        </div>
+        <div class="prod-tags">
+          <span class="prod-tag sem">Semantic</span>
+          <span class="prod-tag epi">Episodic</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <h2 class="closing-title">
+      One working memory.<br>
+      <em>Three</em> long-term subtypes.<br>
+      <span style="color: var(--ink-mute);">No more, no less.</span>
+    </h2>
+
+    <div class="closing-actions">
+      <a href="https://www.linkedin.com/in/harnoors" class="cta cta-primary" target="_blank" rel="noopener">
+        Discuss on LinkedIn →
+      </a>
+      <a href="/" class="cta">
+        ← More from Harnoor
+      </a>
+      <a href="mailto:harnoor24@outlook.com" class="cta">
+        Get in touch
+      </a>
+    </div>
+
+    <div class="refs">
+      <div class="refs-label">// References &amp; sources</div>
+      <ul class="refs-list">
+        <li>Sumers et al. — <em>Cognitive Architectures for Language Agents (CoALA)</em> · arXiv:2309.02427 · 2023</li>
+        <li>LangChain · <em>LangMem SDK</em> documentation — semantic, episodic, procedural memory</li>
+        <li>Mem0 · <em>State of AI Agent Memory 2026</em> · benchmarks &amp; multi-signal retrieval</li>
+        <li>Letta · <em>Benchmarking AI Agent Memory: Is a Filesystem All You Need?</em></li>
+        <li>IBM · MongoDB · Redis — production memory architecture guidance, 2026</li>
+        <li>Atlan · <em>Long-Term Memory in LangChain Agents</em> · framework comparison</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-left">
+      <span>© 2026 Harnoor Singh</span>
+      <span>Field Notes / 001</span>
+      <span>v1.0.0</span>
+    </div>
+    <div>Toronto, CA · 43.6532°N</div>
+  </footer>
+
+</main>
+
+<script>
+  const progress = document.getElementById('scrollProgress');
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progress.style.setProperty('--progress', pct + '%');
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+</script>
+</body>
+</html>
