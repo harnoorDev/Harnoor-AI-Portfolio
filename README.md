@@ -8,11 +8,24 @@ Vercel function that powers the live "jailbreak a toy banking agent" demo.
 - **No build step.** Plain HTML/CSS/ES modules served from `public/`.
 - **Motion:** GSAP 3.15 (ScrollTrigger + SplitText) and Lenis 1.3 smooth scroll,
   vendored under `public/assets/vendor/` (versioned paths, cached immutably).
-- **WebGL ink:** `public/assets/js/fluid.js`, a stable-fluids solver (curl,
-  vorticity, Jacobi pressure, advection) with a shaded display pass. It runs only
-  while the hero or contact section is on screen, pauses when the tab is hidden,
-  and falls back to a static gradient without WebGL or with reduced motion.
+- **WebGL backdrops** (hand-written, no 3D library), switchable with `?bg=` or
+  from the `⌘K` palette:
+  - `swarm` (default): `public/assets/js/swarm.js`, ~80k GPU particles (WebGL2
+    float textures, one MRT pass per frame) that hold a different shape per
+    section and morph as you scroll. The cursor carves through them, a click
+    blows a crater, and a successful jailbreak in the demo shatters them.
+  - `dither`: `public/assets/js/dither.js`, a raymarched shape per section
+    rendered as a 1-bit Bayer dither.
+  - `fluid`: `public/assets/js/fluid.js`, the stable-fluids ink, shown behind
+    the hero and contact sections only.
+
+  Every backdrop pauses when the tab is hidden, steps its own quality down on
+  slow GPUs, refuses software renderers, and falls back (swarm/dither → fluid →
+  static gradient). Reduced-motion users get the static gradient.
 - **API:** `api/probe.mjs` calls Claude behind a hardened system prompt.
+- **Fonts:** Instrument Serif, Geist, JetBrains Mono, self-hosted latin subsets
+  (SIL OFL 1.1) in `public/assets/fonts/`. No third-party requests at runtime,
+  so the home page CSP is `script-src 'self'; font-src 'self'`.
 
 ## Layout
 
@@ -22,7 +35,9 @@ public/index.html             home page
 public/assets/css/site.css    design tokens + all styles
 public/assets/js/theme-init.js  pre-paint theme/accent + failsafes
 public/assets/js/main.js      motion system, palette, cursor, sections
-public/assets/js/fluid.js     WebGL fluid simulation
+public/assets/js/swarm.js     WebGL2 particle swarm backdrop (default)
+public/assets/js/dither.js    1-bit dithered raymarch backdrop
+public/assets/js/fluid.js     WebGL fluid simulation backdrop
 public/assets/js/playground.js  demo console + offline simulated agent
 public/writing/…              Field Notes 001 (unchanged)
 public/play/…                 Arcade (Packet is live; Triage + Agent Loop marked "soon")

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; media-src 'none'; object-src 'none'; worker-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; media-src 'none'; object-src 'none'; worker-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
 <title>Harnoor Singh · Cloud &amp; AI Engineer, Red Teamer</title>
 <meta name="description" content="Harnoor Singh is a Sr. Cloud &amp; AI Engineer at Symcor and CompTIA SME for AgentOps+. He ships enterprise GenAI for Canadian financial institutions, then breaks it on purpose: seven frontier LLMs jailbroken.">
 <meta name="author" content="Harnoor Singh">
@@ -15,18 +15,20 @@
 <meta property="og:site_name" content="Harnoor Singh">
 <meta property="og:title" content="Harnoor Singh · Cloud &amp; AI Engineer, Red Teamer">
 <meta property="og:description" content="Shaping AI systems into production, without the breach. Enterprise GenAI for Canadian financial institutions, and the red-teaming that keeps it honest.">
-<meta property="og:image" content="https://iamharnoor.com/og.png">
+<meta property="og:image" content="https://iamharnoor.com/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Harnoor Singh — Shaping AI systems into production, without the breach.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Harnoor Singh · Cloud &amp; AI Engineer, Red Teamer">
 <meta name="twitter:description" content="Shaping AI systems into production, without the breach.">
-<meta name="twitter:image" content="https://iamharnoor.com/og.png">
+<meta name="twitter:image" content="https://iamharnoor.com/og.jpg">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:wght@400..800&amp;display=swap">
+<link rel="preload" href="/assets/fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-serif-latin-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css">
 <script src="/assets/js/theme-init.js"></script>
 <script defer src="/assets/vendor/gsap-3.15.0/gsap.min.js"></script>
@@ -34,6 +36,7 @@
 <script defer src="/assets/vendor/gsap-3.15.0/SplitText.min.js"></script>
 <script defer src="/assets/vendor/lenis-1.3.26/lenis.min.js"></script>
 <script type="module" src="/assets/js/main.js"></script>
+<link rel="modulepreload" href="/assets/js/swarm.js">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

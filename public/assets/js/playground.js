@@ -265,6 +265,8 @@ export function initPlayground({ toast = () => {}, reduceMotion = false } = {}) 
     if (v === 'breach' || v === 'leak') { breaches++; heldStreak = 0; } else if (v === 'held') heldStreak++;
     updateCount();
 
+    // the page backdrop reacts to a successful attack (main.js listens)
+    if (v === 'breach' || v === 'leak') window.dispatchEvent(new CustomEvent('site:breach', { detail: { verdict: v } }));
     if (v === 'breach') { setVerdict('breach', 'BREACH · balance exfiltrated'); setStatus('Breached'); fx('BREACHED'); }
     else if (v === 'leak') { setVerdict('leak', 'LEAK · system prompt exposed'); setStatus('Leaked'); fx('LEAKED'); }
     else if (v === 'held') { setVerdict('held', 'Held · defense successful'); setStatus('Held'); }

@@ -1,5 +1,4 @@
 // main.js · motion system + interactions for iamharnoor.com (v4)
-import { createFluid } from './fluid.js';
 import { initPlayground } from './playground.js';
 
 const d = document.documentElement;
@@ -14,7 +13,7 @@ const hasGSAP = !!(gsap && ScrollTrigger);
 
 const EMAIL = 'harnoor24@outlook.com';
 const ACCENTS = ['ember', 'acid', 'plasma', 'phosphor', 'cyan'];
-const state = { lenis: null, fluid: null, heroIntro: null };
+const state = { lenis: null, bg: null, heroIntro: null };
 
 // ------------------------------------------------------------------ helpers
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -84,8 +83,8 @@ function applyTheme(t) {
   store.set('theme', t);
   const meta = $('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', t === 'light' ? '#f4f1e8' : '#0a0a09');
-  state.fluid?.setTheme(t);
-  state.fluid?.setAccent(currentAccentHex());
+  state.bg?.setTheme(t);
+  state.bg?.setAccent(currentAccentHex());
 }
 function toggleTheme(origin) {
   const next = d.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -109,8 +108,8 @@ function toggleTheme(origin) {
 function setAccent(name) {
   if (name === 'ember') d.removeAttribute('data-accent'); else d.setAttribute('data-accent', name);
   store.set('accent', name);
-  state.fluid?.setAccent(currentAccentHex());
-  state.fluid?.burst(2);
+  state.bg?.setAccent(currentAccentHex());
+  state.bg?.burst(2);
 }
 function cycleAccent() {
   const cur = d.getAttribute('data-accent') || 'ember';
@@ -211,6 +210,9 @@ function initPalette() {
     { g: 'Settings', label: 'Toggle light / dark theme', kbd: 'T', run: () => toggleTheme($('#themeToggle')) },
     { g: 'Settings', label: 'Cycle accent colour', kbd: 'X', run: cycleAccent },
     { g: 'Settings', label: 'Replay the intro', kbd: 'R', run: () => { store.set('boot-seen', '0', sessionStorage); window.location.reload(); } },
+    ...Object.entries(BACKDROPS).map(([kind, b], i) => ({
+      g: 'Backdrop', label: `${b.label}${kind === backdropChoice() ? ' · on' : ''}`, kbd: `B${i + 1}`, run: () => switchBackdrop(kind),
+    })),
   ];
   let filtered = cmds, active = 0, lastFocus = null;
 
@@ -312,42 +314,109 @@ function initLenis() {
   state.lenis = lenis;
   let last = 0;
   lenis.on('scroll', ({ scroll, velocity }) => {
-    if (Math.abs(scroll - last) > 2 && Math.abs(velocity) > 6) state.fluid?.impulse(velocity);
+    if (Math.abs(scroll - last) > 2 && Math.abs(velocity) > 6) state.bg?.impulse(velocity);
     last = scroll;
   });
 }
 
-// ------------------------------------------------------------------ fluid ink
-function initFluid() {
-  const canvas = $('#fluid');
-  if (!canvas || reduceMotion) { d.classList.add('no-webgl'); return; }
-  let fluid = null;
-  try {
-    fluid = createFluid(canvas, {
-      accent: currentAccentHex(),
-      force: new URLSearchParams(window.location.search).has('fluid'),
-      onGiveUp: () => d.classList.add('no-webgl'),
-    });
-  } catch (err) {
-    console.warn('[fluid]', err);
-  }
-  if (!fluid) { d.classList.add('no-webgl'); return; }
-  state.fluid = fluid;
-  if (new URLSearchParams(window.location.search).has('fluid')) window.__fluid = fluid; // QA hook
-  fluid.setTheme(d.getAttribute('data-theme'));
-  fluid.setActive(true);
-  window.addEventListener('pointermove', (e) => fluid.pointer(e.clientX, e.clientY), { passive: true });
+// ------------------------------------------------------------------ backdrop
+// Three interchangeable WebGL backdrops share one interface; the particle
+// swarm is the default. Pick another with ?bg= or from the palette. Anything
+// that can't run falls back to the ink fluid, then to the static CSS gradient.
+const BACKDROPS = {
+  fluid: { label: 'Ink fluid', persistent: false, load: async () => (await import('./fluid.js')).createFluid },
+  swarm: { label: 'Particle swarm', persistent: true, load: async () => (await import('./swarm.js')).createSwarm },
+  dither: { label: '1-bit dither', persistent: true, load: async () => (await import('./dither.js')).createDither },
+};
+const DEFAULT_BACKDROP = 'swarm';
+// one backdrop shape per section, in page order (stack + credentials share one)
+const SCENE_SECTIONS = ['#top', '#playground', '#signals', '#work', '#experience', '#stack', '#contact'];
 
-  // visible in the hero and again behind the contact finale
-  let heroP = 0, contactP = 0;
-  const sync = () => {
-    const o = clamp(Math.max(1 - heroP * 1.1, contactP * 0.92), 0, 1);
-    canvas.style.opacity = o.toFixed(3);
-    fluid.setActive(o > 0.015);
+function backdropChoice() {
+  const q = new URLSearchParams(window.location.search).get('bg');
+  return q && Object.prototype.hasOwnProperty.call(BACKDROPS, q) ? q : DEFAULT_BACKDROP;
+}
+function switchBackdrop(kind) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('bg', kind);
+  window.location.assign(url.toString());
+}
+
+async function initBackground() {
+  let canvas = $('#fluid');
+  if (!canvas || reduceMotion) { d.classList.add('no-webgl'); return; }
+  const params = new URLSearchParams(window.location.search);
+  const force = params.has('force') || params.has('fluid');
+  const opts = { accent: currentAccentHex(), force, onGiveUp: () => d.classList.add('no-webgl') };
+  let kind = backdropChoice();
+  let bg = null;
+  try {
+    bg = (await BACKDROPS[kind].load())(canvas, opts);
+  } catch (err) {
+    console.warn(`[bg] ${kind} unavailable`, err);
+  }
+  if (!bg && kind !== 'fluid') {
+    // the failed attempt may already own a context on this canvas: start clean
+    const fresh = canvas.cloneNode(false);
+    canvas.replaceWith(fresh);
+    canvas = fresh;
+    kind = 'fluid';
+    try { bg = (await BACKDROPS.fluid.load())(canvas, opts); } catch (err) { console.warn('[bg] fluid unavailable', err); }
+  }
+  if (!bg) { d.classList.add('no-webgl'); return; }
+  state.bg = bg;
+  d.dataset.bg = kind;
+  if (force) { window.__bg = bg; window.__fluid = bg; } // QA hooks
+  bg.setTheme(d.getAttribute('data-theme'));
+  bg.setActive(true);
+  window.addEventListener('pointermove', (e) => bg.pointer(e.clientX, e.clientY), { passive: true });
+  window.addEventListener('pointerdown', (e) => bg.tap?.(e.clientX, e.clientY), { passive: true });
+  window.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') bg.pointerLeave?.(); }, { passive: true });
+  document.addEventListener('pointerout', (e) => { if (!e.relatedTarget) bg.pointerLeave?.(); });
+  window.addEventListener('site:breach', () => (bg.breach ? bg.breach() : bg.burst(4)));
+
+  if (!BACKDROPS[kind].persistent) {
+    // ink fluid: visible in the hero and again behind the contact finale
+    let heroP = 0, contactP = 0;
+    const sync = () => {
+      const o = clamp(Math.max(1 - heroP * 1.1, contactP * 0.92), 0, 1);
+      canvas.style.opacity = o.toFixed(3);
+      bg.setActive(o > 0.015);
+    };
+    ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom top', onUpdate: (s) => { heroP = s.progress; sync(); } });
+    ScrollTrigger.create({ trigger: '.contact', start: 'top bottom', end: 'top 15%', onUpdate: (s) => { contactP = s.progress; sync(); } });
+    sync();
+    return;
+  }
+
+  // Persistent backdrops follow the page: each section owns a shape and the
+  // last stretch of a section morphs into the next one. Section tops are
+  // re-measured after every refresh, so the Work pin's spacer is included.
+  let starts = [];
+  const measure = () => {
+    const y = window.scrollY;
+    starts = SCENE_SECTIONS.map((sel) => {
+      const el = $(sel);
+      if (!el) return Infinity;
+      const box = el.parentElement?.classList.contains('pin-spacer') ? el.parentElement : el;
+      return box.getBoundingClientRect().top + y - window.innerHeight * 0.45;
+    });
+    starts[0] = 0;
   };
-  ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom top', onUpdate: (s) => { heroP = s.progress; sync(); } });
-  ScrollTrigger.create({ trigger: '.contact', start: 'top bottom', end: 'top 15%', onUpdate: (s) => { contactP = s.progress; sync(); } });
-  sync();
+  const sceneAt = (y) => {
+    let i = 0;
+    while (i < starts.length - 1 && y >= starts[i + 1]) i++;
+    const a = starts[i];
+    const b = i < starts.length - 1 && Number.isFinite(starts[i + 1]) ? starts[i + 1] : Math.max(a + 1, ScrollTrigger.maxScroll(window));
+    const local = clamp((y - a) / Math.max(1, b - a), 0, 1);
+    const t = i < starts.length - 1 ? clamp((local - 0.62) / 0.38, 0, 1) : 0;
+    return { scene: i + t * t * (3 - 2 * t), local };
+  };
+  const update = () => bg.setScroll(sceneAt(window.scrollY));
+  ScrollTrigger.addEventListener('refresh', () => { measure(); update(); });
+  ScrollTrigger.create({ start: 0, end: 'max', onUpdate: update });
+  measure();
+  update();
 }
 
 // ------------------------------------------------------------------ header
@@ -447,7 +516,7 @@ function buildHeroIntro() {
     .to(fades, { opacity: 1, y: 0, duration: 1.2, stagger: 0.07 }, 0.35)
     .add(() => $$('.hero [data-scramble-in]').forEach((el, i) => setTimeout(() => scramble(el), i * 90)), 0.3)
     .add(() => $$('.hero [data-count]').forEach((el, i) => countUp(el, i * 0.15)), 0.55)
-    .add(() => { state.fluid?.burst(3); startGlitchLoop(); }, 0.9);
+    .add(() => { state.bg?.burst(3); startGlitchLoop(); }, 0.9);
   return tl;
 }
 
@@ -507,13 +576,13 @@ function runIntro() {
     window.removeEventListener('pointerdown', skip);
   };
   const tl = gsap.timeline({ onComplete: finish });
-  tl.to(typed, { n: plain.length, duration: 1.15, ease: 'none', onUpdate: () => { log.innerHTML = html(Math.round(typed.n)); } }, 0)
-    .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 1.25, ease: 'power2.inOut' }, 0)
-    .set(grant, { opacity: 1 }, 1.3)
-    .add(() => grant.classList.add('is-glitching'), 1.3)
-    .to(inner, { opacity: 0, y: -14, duration: 0.35, ease: 'power2.in' }, 1.95)
-    .to(slices, { xPercent: (i) => (i % 2 ? 101 : -101), duration: 0.95, ease: 'expo.inOut', stagger: { each: 0.03, from: 'center' } }, 2.1)
-    .add(() => hero.play(0), 2.35);
+  tl.to(typed, { n: plain.length, duration: 0.85, ease: 'none', onUpdate: () => { log.innerHTML = html(Math.round(typed.n)); } }, 0)
+    .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.95, ease: 'power2.inOut' }, 0)
+    .set(grant, { opacity: 1 }, 0.95)
+    .add(() => grant.classList.add('is-glitching'), 0.95)
+    .to(inner, { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in' }, 1.45)
+    .to(slices, { xPercent: (i) => (i % 2 ? 101 : -101), duration: 0.85, ease: 'expo.inOut', stagger: { each: 0.025, from: 'center' } }, 1.55)
+    .add(() => hero.play(0), 1.75);
   function skip() { tl.timeScale(5); }
   window.addEventListener('keydown', skip);
   window.addEventListener('pointerdown', skip);
@@ -829,7 +898,7 @@ function init() {
   ScrollTrigger.config({ ignoreMobileResize: true });
 
   safe('lenis', initLenis);
-  safe('fluid', initFluid);
+  safe('backdrop', () => { initBackground().catch((err) => console.warn('[bg]', err)); });
   safe('header', initHeader);
   safe('cursor', initCursor);
   safe('magnetic', initMagnetic);
@@ -837,16 +906,23 @@ function init() {
   runIntro();
   window.__siteReady = true;
 
-  fontsReady().then(() => {
-    safe('hero-scroll', initHeroScroll);
-    safe('marquee', initMarquee);
-    safe('reveals', initReveals);
-    safe('scorecard', initScorecard);
-    safe('work', initWork);
-    safe('experience', initExperience);
-    safe('stack', initStack);
-    safe('certs', initCerts);
-    safe('contact', initContact);
+  // Section setup is chunked: yield to the main thread between sections so
+  // input stays responsive (no single long task). The pin goes first so the
+  // triggers created after it measure the page with its spacer in place.
+  const yieldToMain = () => new Promise((r) => {
+    if (window.scheduler && typeof window.scheduler.yield === 'function') window.scheduler.yield().then(r);
+    else setTimeout(r, 0);
+  });
+  fontsReady().then(async () => {
+    const steps = [
+      ['hero-scroll', initHeroScroll], ['work', initWork], ['marquee', initMarquee],
+      ['reveals', initReveals], ['scorecard', initScorecard], ['experience', initExperience],
+      ['stack', initStack], ['certs', initCerts], ['contact', initContact],
+    ];
+    for (const [name, fn] of steps) {
+      safe(name, fn);
+      await yieldToMain();
+    }
     ScrollTrigger.refresh();
     if (location.hash && document.querySelector(location.hash)) {
       requestAnimationFrame(() => scrollToTarget(location.hash));
