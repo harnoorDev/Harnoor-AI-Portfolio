@@ -551,7 +551,6 @@ function runIntro() {
     ['> vector  : prompt-injection', ''],
     ['> bypassing guardrails .........', ' ok'],
   ];
-  const plain = script.map(([a, b]) => a + b).join('\n');
   const html = (n) => {
     let out = '', used = 0;
     script.forEach(([a, b], i) => {
@@ -576,13 +575,31 @@ function runIntro() {
     window.removeEventListener('pointerdown', skip);
   };
   const tl = gsap.timeline({ onComplete: finish });
-  tl.to(typed, { n: plain.length, duration: 0.85, ease: 'none', onUpdate: () => { log.innerHTML = html(Math.round(typed.n)); } }, 0)
-    .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.95, ease: 'power2.inOut' }, 0)
-    .set(grant, { opacity: 1 }, 0.95)
-    .add(() => grant.classList.add('is-glitching'), 0.95)
-    .to(inner, { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in' }, 1.45)
-    .to(slices, { xPercent: (i) => (i % 2 ? 101 : -101), duration: 0.85, ease: 'expo.inOut', stagger: { each: 0.025, from: 'center' } }, 1.55)
-    .add(() => hero.play(0), 1.75);
+  const render = () => { log.innerHTML = html(Math.round(typed.n)); };
+  // Type each command at a readable terminal pace; the " ok" lands a beat
+  // later, like a real shell. ~2.6s of log, then ACCESS GRANTED holds.
+  let at = 0.1, pos = 0;
+  script.forEach(([cmd, ok], i) => {
+    const dur = cmd.length * 0.0095;
+    tl.to(typed, { n: pos + cmd.length, duration: dur, ease: 'none', onUpdate: render }, at);
+    at += dur;
+    pos += cmd.length;
+    if (ok) {
+      at += 0.14;
+      tl.to(typed, { n: pos + ok.length, duration: 0.05, ease: 'none', onUpdate: render }, at);
+      at += 0.05;
+      pos += ok.length;
+    }
+    at += 0.09;
+    if (i < script.length - 1) pos += 1; // the newline
+  });
+  const granted = at + 0.12;
+  tl.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: at, ease: 'power2.inOut' }, 0)
+    .set(grant, { opacity: 1 }, granted)
+    .add(() => grant.classList.add('is-glitching'), granted)
+    .to(inner, { opacity: 0, y: -14, duration: 0.35, ease: 'power2.in' }, granted + 0.6)
+    .to(slices, { xPercent: (i) => (i % 2 ? 101 : -101), duration: 0.95, ease: 'expo.inOut', stagger: { each: 0.03, from: 'center' } }, granted + 0.75)
+    .add(() => hero.play(0), granted + 1.0);
   function skip() { tl.timeScale(5); }
   window.addEventListener('keydown', skip);
   window.addEventListener('pointerdown', skip);
