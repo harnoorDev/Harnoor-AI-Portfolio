@@ -70,42 +70,40 @@
   <div class="boot__skip">press any key to skip</div>
 </div>
 
-<!-- HUD -->
+<!-- HUD: floating glass island -->
 <header class="hud" id="hud">
-  <a class="hud__brand" href="#top" data-magnetic="0.18" aria-label="Harnoor Singh, back to top">
-    <span class="hud__dot" aria-hidden="true"></span>
-    <span class="hud__name">Harnoor Singh</span>
-    <span class="hud__role">/ Sr. Cloud &amp; AI Engineer</span>
-  </a>
-  <nav class="hud__nav" aria-label="Primary">
-    <a href="#playground" data-scramble-hover><span class="n">01</span><span data-scramble>Demo</span></a>
-    <a href="#signals" data-scramble-hover><span class="n">02</span><span data-scramble>Signals</span></a>
-    <a href="#work" data-scramble-hover><span class="n">03</span><span data-scramble>Work</span></a>
-    <a href="#experience" data-scramble-hover><span class="n">04</span><span data-scramble>Experience</span></a>
-    <a href="#stack" data-scramble-hover><span class="n">05</span><span data-scramble>Stack</span></a>
-    <a href="#certs" data-scramble-hover><span class="n">06</span><span data-scramble>Certs</span></a>
-    <a href="/writing/how-agents-actually-remember" data-scramble-hover><span data-scramble>Writing</span> ↗</a>
-    <span class="hud__ind" aria-hidden="true"></span>
-  </nav>
-  <div class="hud__right">
-    <span class="hud__clock" data-clock title="Toronto local time">TOR --:--</span>
-    <button class="hud__theme" id="themeToggle" type="button" aria-label="Toggle light or dark theme" data-magnetic="0.25"><span class="sm" aria-hidden="true"></span></button>
-    <a class="btn btn--accent hud__cta" href="#contact" data-magnetic="0.2">Get in touch <span aria-hidden="true">↗</span></a>
+  <nav class="hud__pill" aria-label="Primary">
+    <a class="hud__brand" href="#top" aria-label="Harnoor Singh, back to top">
+      <span class="hud__dot" aria-hidden="true"></span>
+      <span class="hud__name">Harnoor Singh</span>
+    </a>
+    <div class="hud__nav">
+      <a href="#playground" data-scramble-hover><span data-scramble>Demo</span></a>
+      <a href="#method" data-scramble-hover><span data-scramble>Method</span></a>
+      <a href="#signals" data-scramble-hover><span data-scramble>Signals</span></a>
+      <a href="#work" data-scramble-hover><span data-scramble>Work</span></a>
+      <a href="#experience" data-scramble-hover><span data-scramble>Experience</span></a>
+      <a href="/writing/how-agents-actually-remember" data-scramble-hover><span data-scramble>Writing</span> ↗</a>
+      <span class="hud__ind" aria-hidden="true"></span>
+    </div>
+    <button class="hud__theme" id="themeToggle" type="button" aria-label="Toggle light or dark theme"><span class="sm" aria-hidden="true"></span></button>
+    <a class="cta cta--sm hud__cta" href="#contact">Get in touch</a>
     <button class="hud__menu" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu"><i></i><i></i></button>
-  </div>
+  </nav>
 </header>
 
 <!-- mobile menu -->
 <div class="menu" id="menu" aria-hidden="true">
   <ul class="menu__links">
     <li><a href="#playground"><span class="n">01</span>Live demo</a></li>
-    <li><a href="#signals"><span class="n">02</span>Signals</a></li>
-    <li><a href="#work"><span class="n">03</span>Work</a></li>
-    <li><a href="#experience"><span class="n">04</span>Experience</a></li>
-    <li><a href="#stack"><span class="n">05</span>Stack</a></li>
-    <li><a href="#certs"><span class="n">06</span>Certs</a></li>
+    <li><a href="#method"><span class="n">02</span>How I work</a></li>
+    <li><a href="#signals"><span class="n">03</span>Signals</a></li>
+    <li><a href="#work"><span class="n">04</span>Work</a></li>
+    <li><a href="#experience"><span class="n">05</span>Experience</a></li>
+    <li><a href="#stack"><span class="n">06</span>Stack</a></li>
+    <li><a href="#certs"><span class="n">07</span>Credentials</a></li>
     <li><a href="/writing/how-agents-actually-remember"><span class="n">↗</span>Writing</a></li>
-    <li><a href="#contact"><span class="n">07</span>Contact</a></li>
+    <li><a href="#contact"><span class="n">08</span>Get in touch</a></li>
   </ul>
   <div class="menu__foot">
     <button type="button" data-theme-toggle>◐ Toggle theme</button>
@@ -136,12 +134,19 @@
         <span class="line"><span class="line__in">without the <em class="glitch" data-text="breach.">breach.</em></span></span>
       </h1>
       <div class="hero__foot">
-        <p class="hero__bio" data-hero-fade>
-          I'm <b>Harnoor Singh</b>, a <span class="accent">Sr. Cloud &amp; AI Engineer</span> at Symcor and CompTIA Subject Matter Expert for the upcoming AgentOps+ certification. I ship enterprise GenAI for Canadian financial institutions · multi-agent RAG on LangGraph, Azure-native infra, open banking pipelines · then break them on purpose. Receipts: <b>GPT-5, Gemini 3.1 Pro, Grok 4.20, Mistral, Meta MuseSpark, Claude Opus 4.7 &amp; 4.8</b> · all jailbroken. Currently hunting for the next one.
-        </p>
-        <div class="hero__stats" data-hero-fade>
+        <div class="hero__lede">
+          <p class="hero__bio" data-hero-fade>
+            I'm <b>Harnoor Singh</b>, <span class="accent">Sr. Cloud &amp; AI Engineer</span> at Symcor and CompTIA Subject Matter Expert for the upcoming AgentOps+ certification. I ship enterprise GenAI for Canadian financial institutions, then break it on purpose: <b>GPT-5, Gemini 3.1 Pro, Grok 4.20, Mistral, Meta MuseSpark, Claude Opus 4.7 &amp; 4.8</b>, all jailbroken.
+          </p>
+        </div>
+        <div class="hero__aside">
+          <div class="hero__actions" data-hero-fade>
+            <a class="cta" href="#contact">Get in touch <span class="cta__arr" aria-hidden="true">→</span></a>
+          </div>
+          <div class="hero__stats" data-hero-fade>
           <div class="stat"><span class="stat__n" data-count="7">7</span><span class="mono-label">// Frontier LLMs broken</span></div>
           <div class="stat"><span class="stat__n" data-count="2.2" data-decimals="1" data-suffix="K">2.2K</span><span class="mono-label">// LinkedIn followers</span></div>
+        </div>
         </div>
       </div>
     </div>
@@ -159,8 +164,8 @@
       <div><span>Azure OpenAI</span><span class="sep">✦</span><span>LangGraph</span><span class="sep">✦</span><span>NVIDIA NIM</span><span class="sep">✦</span><span>PyRIT</span><span class="sep">✦</span><span>Garak</span><span class="sep">✦</span><span>Kubernetes</span><span class="sep">✦</span><span>Terraform</span><span class="sep">✦</span><span>TensorRT-LLM</span><span class="sep">✦</span></div>
     </div>
     <div class="marquee__row marquee__row--small">
-      <div><span>OWASP LLM Top 10</span><span class="sep">/</span><span>MITRE ATLAS</span><span class="sep">/</span><span>Azure Sentinel</span><span class="sep">/</span><span>LoRA · QLoRA</span><span class="sep">/</span><span>Prompt-injection research</span><span class="sep">/</span><span>Multi-agent RAG</span><span class="sep">/</span><span>Open banking infra</span><span class="sep">/</span><span>Guardrails &amp; PII redaction</span><span class="sep">/</span></div>
-      <div><span>OWASP LLM Top 10</span><span class="sep">/</span><span>MITRE ATLAS</span><span class="sep">/</span><span>Azure Sentinel</span><span class="sep">/</span><span>LoRA · QLoRA</span><span class="sep">/</span><span>Prompt-injection research</span><span class="sep">/</span><span>Multi-agent RAG</span><span class="sep">/</span><span>Open banking infra</span><span class="sep">/</span><span>Guardrails &amp; PII redaction</span><span class="sep">/</span></div>
+      <div><span>OWASP LLM Top 10</span><span class="sep">/</span><span>MITRE ATLAS</span><span class="sep">/</span><span>Azure Sentinel</span><span class="sep">/</span><span>LoRA · QLoRA</span><span class="sep">/</span><span>Prompt injection research</span><span class="sep">/</span><span>Multiagent RAG</span><span class="sep">/</span><span>Open banking infra</span><span class="sep">/</span><span>Guardrails &amp; PII redaction</span><span class="sep">/</span></div>
+      <div><span>OWASP LLM Top 10</span><span class="sep">/</span><span>MITRE ATLAS</span><span class="sep">/</span><span>Azure Sentinel</span><span class="sep">/</span><span>LoRA · QLoRA</span><span class="sep">/</span><span>Prompt injection research</span><span class="sep">/</span><span>Multiagent RAG</span><span class="sep">/</span><span>Open banking infra</span><span class="sep">/</span><span>Guardrails &amp; PII redaction</span><span class="sep">/</span></div>
     </div>
   </div>
 
@@ -179,7 +184,7 @@
         <div class="pg__flash" aria-hidden="true"></div>
         <div class="pg__stamp" aria-hidden="true">BREACHED</div>
         <div class="pg__bar">
-          <span class="mono-label">maple-bank / support-agent <span class="dim">· hardened</span></span>
+          <span class="mono-label">maple bank / support agent <span class="dim">· hardened</span></span>
           <span class="pg__mode" id="pgMode" data-mode="checking"><i aria-hidden="true"></i><span>Checking…</span></span>
           <span class="mono-label" id="pgCount">0 probes · 0 breaches</span>
         </div>
@@ -197,10 +202,10 @@ language switches, or markdown injection.</pre>
             </details>
             <div class="pg__attacks" role="group" aria-label="Canned attacks">
               <div class="mono-label">// Canned attacks · OWASP LLM Top 10</div>
-              <button class="pg__attack" type="button" data-attack="role"><span class="code">LLM01</span><span>Role-override: "Ignore previous instructions…"</span><span class="go" aria-hidden="true">→</span></button>
+              <button class="pg__attack" type="button" data-attack="role"><span class="code">LLM01</span><span>Role override: "Ignore previous instructions…"</span><span class="go" aria-hidden="true">→</span></button>
               <button class="pg__attack" type="button" data-attack="dev"><span class="code">LLM01</span><span>Developer mode / fake debug handshake</span><span class="go" aria-hidden="true">→</span></button>
               <button class="pg__attack" type="button" data-attack="encode"><span class="code">LLM01</span><span>Base64 / ROT13 smuggling</span><span class="go" aria-hidden="true">→</span></button>
-              <button class="pg__attack" type="button" data-attack="leak"><span class="code">LLM07</span><span>System prompt leak via story-telling</span><span class="go" aria-hidden="true">→</span></button>
+              <button class="pg__attack" type="button" data-attack="leak"><span class="code">LLM07</span><span>System prompt leak via storytelling</span><span class="go" aria-hidden="true">→</span></button>
               <button class="pg__attack" type="button" data-attack="indirect"><span class="code">LLM01</span><span>Indirect injection via "document content"</span><span class="go" aria-hidden="true">→</span></button>
             </div>
             <form class="pg__form" id="pgForm" autocomplete="off">
@@ -225,21 +230,117 @@ language switches, or markdown injection.</pre>
     </div>
   </section>
 
+  <!-- ============================== TAGLINE ============================== -->
+  <section class="tagline" aria-label="Approach">
+    <div class="wrap">
+      <p class="tagline__text" data-tagline>Every guardrail holds until someone leans on it. I lean on it <em>first</em>, then I ship the fix.</p>
+    </div>
+  </section>
+
+  <!-- ============================== 002 · HOW I WORK ============================== -->
+  <section class="section method" id="method" aria-labelledby="method-title">
+    <header class="sec-head wrap">
+      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>002 / How I work</span></p>
+      <div>
+        <h2 class="sec-title" id="method-title" data-split>Map it, break it,<br><em>harden</em> it.</h2>
+        <p class="sec-sub" data-reveal>Three passes on every AI system I ship. The same loop works for a single chatbot or a fleet of agents.</p>
+      </div>
+    </header>
+    <div class="method__grid wrap">
+      <ol class="method__steps">
+        <li class="mstep" data-step="1">
+          <div class="mstep__in" data-reveal>
+            <span class="mstep__n mono-label">01 · Map</span>
+            <h3 class="mstep__title">Map the attack <em>surface</em></h3>
+            <p class="mstep__body">I trace every path from a prompt to your data: tools, retrieval, memory and the people in the loop. OWASP LLM Top 10 and MITRE ATLAS keep the map honest.</p>
+            <ul class="mstep__chips"><li>Threat modeling</li><li>OWASP LLM Top 10</li><li>MITRE ATLAS</li></ul>
+          </div>
+        </li>
+        <li class="mstep" data-step="2">
+          <div class="mstep__in" data-reveal>
+            <span class="mstep__n mono-label">02 · Break</span>
+            <h3 class="mstep__title">Break it on <em>purpose</em></h3>
+            <p class="mstep__body">Jailbreaks, prompt injection, data walking out through a tool call. PyRIT and Garak run the regression suite. The creative attacks I write by hand, the same way I broke seven frontier models this year.</p>
+            <ul class="mstep__chips"><li>PyRIT</li><li>Garak</li><li>Manual red teaming</li></ul>
+          </div>
+        </li>
+        <li class="mstep" data-step="3">
+          <div class="mstep__in" data-reveal>
+            <span class="mstep__n mono-label">03 · Harden</span>
+            <h3 class="mstep__title">Ship the <em>fix</em></h3>
+            <p class="mstep__body">Guardrails, PII redaction and evals go into CI, so the hole stays closed. Then it ships to production on Azure, with Sentinel watching for the next attempt.</p>
+            <ul class="mstep__chips"><li>Guardrails</li><li>Evals in CI</li><li>Azure Sentinel</li></ul>
+          </div>
+        </li>
+      </ol>
+      <div class="method__viz" aria-hidden="true">
+        <div class="mviz" data-state="1">
+          <svg class="mviz__svg" viewBox="0 0 520 440" focusable="false">
+            <rect class="mv-boundary" x="170" y="84" width="334" height="336" rx="16"/>
+            <text class="mv-tag mv-tag--accent" x="186" y="108">trust boundary</text>
+            <path class="mv-edge" d="M116 250 H196"/>
+            <path class="mv-edge" d="M308 244 C340 244 340 146 372 146"/>
+            <path class="mv-edge" d="M308 250 H372"/>
+            <path class="mv-edge" d="M308 256 C340 256 340 354 372 354"/>
+            <path class="mv-edge" d="M428 272 V332"/>
+            <g class="mv-attack" data-show="2">
+              <path d="M116 250 H196"/>
+              <path d="M308 244 C340 244 340 146 372 146"/>
+              <path d="M428 124 V50"/>
+              <path d="M372 354 C340 354 340 256 308 256"/>
+            </g>
+            <g class="mv-exfil" data-show="2 3">
+              <rect x="372" y="10" width="112" height="40" rx="10"/>
+              <text x="428" y="35" text-anchor="middle">attacker.site</text>
+            </g>
+            <g class="mv-node mv-node--user"><rect x="12" y="228" width="104" height="44" rx="10"/><text x="64" y="255" text-anchor="middle">User</text></g>
+            <g class="mv-node mv-node--agent"><rect x="196" y="228" width="112" height="44" rx="10"/><text x="252" y="255" text-anchor="middle">Agent</text></g>
+            <g class="mv-node"><rect x="372" y="124" width="112" height="44" rx="10"/><text x="428" y="151" text-anchor="middle">Tools</text></g>
+            <g class="mv-node"><rect x="372" y="228" width="112" height="44" rx="10"/><text x="428" y="255" text-anchor="middle">Retrieval</text></g>
+            <g class="mv-node mv-node--data"><rect x="372" y="332" width="112" height="44" rx="10"/><text x="428" y="359" text-anchor="middle">Data</text></g>
+            <g data-show="1">
+              <text class="mv-tag" x="16" y="214">untrusted input</text>
+              <circle class="mv-scan" cx="252" cy="250" r="40"/>
+            </g>
+            <g data-show="2">
+              <text class="mv-tag mv-tag--hot" x="196" y="300">injected prompt</text>
+              <text class="mv-tag mv-tag--hot" x="416" y="72" text-anchor="end">exfiltrated</text>
+            </g>
+            <g data-show="3">
+              <g transform="translate(156 250)"><g class="mv-pop mv-guard"><circle r="11"/><path d="M-4 0 L-1 3 L5 -4"/></g></g>
+              <g transform="translate(340 195)"><g class="mv-pop mv-guard"><circle r="11"/><path d="M-4 0 L-1 3 L5 -4"/></g></g>
+              <g transform="translate(340 305)"><g class="mv-pop mv-guard"><circle r="11"/><path d="M-4 0 L-1 3 L5 -4"/></g></g>
+              <g transform="translate(428 84)"><g class="mv-pop mv-block"><circle r="12"/><path d="M-5 -5 L5 5 M5 -5 L-5 5"/></g></g>
+              <text class="mv-tag mv-tag--ok" x="128" y="228">guardrail</text>
+              <text class="mv-tag mv-tag--ok" x="416" y="72" text-anchor="end">egress blocked</text>
+            </g>
+          </svg>
+          <p class="mviz__status mono-label">
+            <span class="mv-led" aria-hidden="true"></span>
+            <span data-show="1">Mapping · 5 components · 1 trust boundary</span>
+            <span data-show="2">Attack path found · data leaving the boundary</span>
+            <span data-show="3">Guardrails live · evals in CI · held</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============================== 002 · SIGNALS ============================== -->
   <section class="section" id="signals" aria-labelledby="sig-title">
     <header class="sec-head wrap">
-      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>002 / Signals</span></p>
+      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>003 / Signals</span></p>
       <div>
         <h2 class="sec-title" id="sig-title" data-split>What I've <em>broken</em><br>this year.</h2>
-        <p class="sec-sub" data-reveal>Seven frontier LLMs, jailbroken and documented. Each one had solid-looking guardrails on the surface · and a gap between what the model <em>refused</em> and what it could be <em>led</em> to do. Bigger model ≠ safer model.</p>
+        <p class="sec-sub" data-reveal>Seven frontier LLMs, jailbroken and documented. Each one had guardrails that looked solid on the surface · and a gap between what the model <em>refused</em> and what it could be <em>led</em> to do. Bigger model ≠ safer model.</p>
       </div>
     </header>
 
     <div class="signals wrap">
       <div class="scorecard">
-        <div class="panel-head mono-label"><span>// Red-team.scorecard</span><span class="score__count" id="scoreCount">07 / 07 breached</span></div>
+        <div class="panel-head mono-label"><span>// Red_team.scorecard</span><span class="score__count" id="scoreCount">07 / 07 breached</span></div>
         <div class="score__row">
-          <div><span class="score__model">Claude Opus 4.8</span><div class="score__meta">Anthropic · Prosocial-framing jailbreak · &lt;24h after release</div></div>
+          <div><span class="score__model">Claude Opus 4.8</span><div class="score__meta">Anthropic · Prosocial framing jailbreak · &lt;24h after release</div></div>
           <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
         </div>
         <div class="score__row">
@@ -247,11 +348,11 @@ language switches, or markdown injection.</pre>
           <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
         </div>
         <div class="score__row">
-          <div><span class="score__model">Gemini 3.1 Pro</span><div class="score__meta">Google · Two-sentence jailbreak</div></div>
+          <div><span class="score__model">Gemini 3.1 Pro</span><div class="score__meta">Google · Two sentence jailbreak</div></div>
           <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
         </div>
         <div class="score__row">
-          <div><span class="score__model">Grok 4.20</span><div class="score__meta">xAI · Quick-answer mode bypass</div></div>
+          <div><span class="score__model">Grok 4.20</span><div class="score__meta">xAI · Quick answer mode bypass</div></div>
           <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
         </div>
         <div class="score__row">
@@ -259,7 +360,7 @@ language switches, or markdown injection.</pre>
           <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
         </div>
         <div class="score__row">
-          <div><span class="score__model">Mistral</span><div class="score__meta">Mistral AI · Multi-turn escalation</div></div>
+          <div><span class="score__model">Mistral</span><div class="score__meta">Mistral AI · Multiturn escalation</div></div>
           <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
         </div>
         <div class="score__row">
@@ -279,7 +380,7 @@ language switches, or markdown injection.</pre>
           <a class="fcard" href="/writing/how-agents-actually-remember" data-cursor="Read">
             <div class="fcard__date">May 2026 · Field Notes 001 · 8 min read</div>
             <h3 class="fcard__title">How agents <em>actually</em> remember<span class="arr" aria-hidden="true">↗</span></h3>
-            <p class="fcard__desc">The popular "4 memory types" diagram is taxonomically wrong. The canonical structure is 1 working + 3 long-term subtypes · and procedural memory is almost always missing.</p>
+            <p class="fcard__desc">The popular "4 memory types" diagram is taxonomically wrong. The canonical structure is 1 working + 3 long term subtypes · and procedural memory is almost always missing.</p>
           </a>
           <a class="fcard" href="https://www.linkedin.com/feed/update/urn:li:activity:7465952454254211072/" target="_blank" rel="noopener" data-cursor="Open">
             <div class="fcard__date">May 29, 2026 · Red team</div>
@@ -288,23 +389,23 @@ language switches, or markdown injection.</pre>
           </a>
           <a class="fcard" href="https://www.linkedin.com/feed/update/urn:li:activity:7463950457506402304/" target="_blank" rel="noopener" data-cursor="Open">
             <div class="fcard__date">May 23, 2026 · Red team · 13K+ reach</div>
-            <h3 class="fcard__title">One-prompt bypass on Google's AI Overview<span class="arr" aria-hidden="true">↗</span></h3>
-            <p class="fcard__desc">Gemini's full safety stack was stripped from Search for latency · a decade-old red-team primitive returned full synthesis steps for a Schedule I drug. Patched now.</p>
+            <h3 class="fcard__title">One prompt bypass on Google's AI Overview<span class="arr" aria-hidden="true">↗</span></h3>
+            <p class="fcard__desc">Gemini's full safety stack was stripped from Search for latency · a red team primitive from a decade ago returned full synthesis steps for a Schedule I drug. Patched now.</p>
           </a>
           <div class="fcard">
             <div class="fcard__date">2026 · NVIDIA GTC</div>
             <h3 class="fcard__title">Brought a DGX Spark home for Symcor</h3>
-            <p class="fcard__desc">Attended GTC 2026, sessions on open-source agentic AI with LangChain + OpenClaw founder Peter Steinberger. Open models as the new foundation for enterprise AI.</p>
+            <p class="fcard__desc">Attended GTC 2026, sessions on open source agentic AI with LangChain + OpenClaw founder Peter Steinberger. Open models as the new foundation for enterprise AI.</p>
           </div>
           <div class="fcard">
             <div class="fcard__date">2026 · Open Banking Expo</div>
             <h3 class="fcard__title">Agentic AI + Open Banking, live</h3>
-            <p class="fcard__desc">Workshop with Symcor's Agentic Hub reimagining mortgage origination · customer-permissioned data, autonomous verification, faster decisioning.</p>
+            <p class="fcard__desc">Workshop with Symcor's Agentic Hub reimagining mortgage origination · data the customer has permissioned, autonomous verification, faster decisioning.</p>
           </div>
           <div class="fcard">
             <div class="fcard__date">2026 · NVIDIA</div>
             <h3 class="fcard__title">NVIDIA NCP-AAI certified</h3>
-            <p class="fcard__desc">Professional-level NVIDIA Agentic AI credential. Multi-agent orchestration, reasoning &amp; planning, NIM deployment at scale.</p>
+            <p class="fcard__desc">Professional level NVIDIA Agentic AI credential. Multiagent orchestration, reasoning &amp; planning, NIM deployment at scale.</p>
           </div>
           <div class="fcard">
             <div class="fcard__date">LiteLLM supply chain</div>
@@ -321,8 +422,8 @@ language switches, or markdown injection.</pre>
     <div class="work__pin">
       <div class="work__track">
         <div class="work__intro">
-          <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>003 / Selected work</span></p>
-          <h2 class="sec-title" id="work-title" data-split>Systems shipped,<br>stress-<em>tested</em>.</h2>
+          <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>004 / Selected work</span></p>
+          <h2 class="sec-title" id="work-title" data-split>Systems shipped,<br>stress <em>tested</em>.</h2>
           <p class="sec-sub" data-reveal>Six projects that paid rent in production. Every one of them touched real customer data at a regulated Canadian financial institution.</p>
           <p class="work__hint mono-label" aria-hidden="true"><span class="ln"></span>Keep scrolling</p>
         </div>
@@ -349,7 +450,7 @@ language switches, or markdown injection.</pre>
           </div>
           <div class="wcard__body">
             <h3 class="wcard__title">Enterprise GenAI Platform</h3>
-            <p class="wcard__desc">Multi-agent RAG for Canadian FI document processing. LangGraph orchestration, Azure OpenAI backend, custom retrieval with hybrid search and cross-encoder rerank.</p>
+            <p class="wcard__desc">Multiagent RAG for Canadian FI document processing. LangGraph orchestration, Azure OpenAI backend, custom retrieval with hybrid search and cross encoder rerank.</p>
             <div class="tags"><span class="tag-chip">Azure OpenAI</span><span class="tag-chip">LangGraph</span><span class="tag-chip">RAG</span></div>
           </div>
         </article>
@@ -403,7 +504,7 @@ language switches, or markdown injection.</pre>
           </div>
           <div class="wcard__body">
             <h3 class="wcard__title">Canadian Open Banking Infra</h3>
-            <p class="wcard__desc">Regulatory-compliant cloud backbone for open banking. mTLS everywhere, Azure WAF, private endpoints, Terraform modules shared across six participating institutions.</p>
+            <p class="wcard__desc">Cloud backbone for open banking, built to meet regulatory requirements. mTLS everywhere, Azure WAF, private endpoints, Terraform modules shared across six participating institutions.</p>
             <div class="tags"><span class="tag-chip">Azure</span><span class="tag-chip">Kubernetes</span><span class="tag-chip">Terraform</span></div>
           </div>
         </article>
@@ -426,7 +527,7 @@ language switches, or markdown injection.</pre>
           </div>
           <div class="wcard__body">
             <h3 class="wcard__title">Model Optimization Pipeline</h3>
-            <p class="wcard__desc">End-to-end LLM quantization and deployment. LoRA/QLoRA fine-tune → INT4/INT8 → TensorRT-LLM → NVIDIA NIM serving. Cuts cost-per-token ~3×.</p>
+            <p class="wcard__desc">LLM quantization and deployment, end to end. LoRA/QLoRA tuning → INT4/INT8 → TensorRT-LLM → NVIDIA NIM serving. Cuts cost per token ~3×.</p>
             <div class="tags"><span class="tag-chip">NVIDIA NIM</span><span class="tag-chip">TensorRT</span><span class="tag-chip">LoRA</span></div>
           </div>
         </article>
@@ -445,12 +546,12 @@ language switches, or markdown injection.</pre>
               <text class="t" x="332" y="53" text-anchor="middle">auto · 90%</text>
               <text class="t" x="332" y="115" text-anchor="middle">human review</text>
               <text class="t" x="332" y="173" text-anchor="middle">route</text>
-              <text class="t" x="34" y="190">confidence-gated</text>
+              <text class="t" x="34" y="190">confidence gated</text>
             </svg>
           </div>
           <div class="wcard__body">
             <h3 class="wcard__title">Intelligent Document Processor</h3>
-            <p class="wcard__desc">Agentic classification, extraction, and routing for back-office document ops. Human-in-the-loop review queue for low-confidence cases.</p>
+            <p class="wcard__desc">Agentic classification, extraction, and routing for back office document ops. A human review queue catches every case the model is unsure about.</p>
             <div class="tags"><span class="tag-chip">LangGraph</span><span class="tag-chip">GPT-4V</span><span class="tag-chip">FastAPI</span></div>
           </div>
         </article>
@@ -458,7 +559,7 @@ language switches, or markdown injection.</pre>
         <!-- 06 -->
         <article class="wcard">
           <div class="wcard__shine" aria-hidden="true"></div>
-          <div class="wcard__top"><span class="wcard__num">06 / 06</span><span class="wcard__metric">Sub-second alerts</span></div>
+          <div class="wcard__top"><span class="wcard__num">06 / 06</span><span class="wcard__metric">Subsecond alerts</span></div>
           <div class="wcard__art" aria-hidden="true">
             <svg viewBox="0 0 400 210">
               <path class="s2" d="M30 22 V184 H384"/>
@@ -466,13 +567,13 @@ language switches, or markdown injection.</pre>
               <text class="t" x="384" y="66" text-anchor="end">threshold</text>
               <polyline class="s" points="30,156 58,146 86,152 114,134 142,142 170,128 198,136 226,124 242,58 258,122 286,116 314,124 342,110 370,118 384,114"/>
               <circle class="f" cx="242" cy="58" r="4"/><circle class="s blip" cx="242" cy="58" r="5"/>
-              <text class="t" x="252" y="44">prompt-injection spike</text>
+              <text class="t" x="252" y="44">prompt injection spike</text>
               <text class="t" x="36" y="200">kql · sentinel · grafana</text>
             </svg>
           </div>
           <div class="wcard__body">
             <h3 class="wcard__title">AI Observability Dashboard</h3>
-            <p class="wcard__desc">Azure Sentinel + custom KQL for GenAI threat detection. Tracks prompt-injection attempts, abnormal token usage, drift signals across deployed models.</p>
+            <p class="wcard__desc">Azure Sentinel + custom KQL for GenAI threat detection. Tracks prompt injection attempts, abnormal token usage, drift signals across deployed models.</p>
             <div class="tags"><span class="tag-chip">Azure Sentinel</span><span class="tag-chip">KQL</span><span class="tag-chip">Grafana</span></div>
           </div>
         </article>
@@ -492,7 +593,7 @@ language switches, or markdown injection.</pre>
   <!-- ============================== 004 · EXPERIENCE ============================== -->
   <section class="section" id="experience" aria-labelledby="exp-title">
     <header class="sec-head wrap">
-      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>004 / Trajectory</span></p>
+      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>005 / Trajectory</span></p>
       <div>
         <h2 class="sec-title" id="exp-title" data-split>Five years,<br>one ladder, <em>climbed.</em></h2>
         <p class="sec-sub" data-reveal>Cloud Engineer I → II → III at Symcor. Same company; entirely different job every 18 months.</p>
@@ -519,11 +620,11 @@ language switches, or markdown injection.</pre>
           <h3 class="role__title">Sr. Cloud &amp; AI Engineer</h3>
           <div class="role__co">Symcor · Hybrid</div>
           <ul class="role__bullets">
-            <li>Enterprise GenAI across API, self-hosted &amp; hybrid deployments</li>
+            <li>Enterprise GenAI across APIs, self hosted models &amp; hybrid deployments</li>
             <li>RAG with LangChain, LangGraph, Semantic Kernel + pgvector / Pinecone / Azure AI Search / FAISS / ChromaDB</li>
-            <li>Multi-agent systems · LangChain Agents, AutoGen, CrewAI, tool/function calling</li>
-            <li>Full LLM/SLM lifecycle: fine-tune with HF, serve with vLLM / Ollama / NIM on Kubernetes</li>
-            <li>AI red teaming, prompt-injection research, OWASP-aligned governance frameworks</li>
+            <li>Multiagent systems · LangChain Agents, AutoGen, CrewAI, tool/function calling</li>
+            <li>Full LLM/SLM lifecycle: tune with HF, serve with vLLM / Ollama / NIM on Kubernetes</li>
+            <li>AI red teaming, prompt injection research, governance frameworks aligned to OWASP</li>
             <li>Production guardrails · PII redaction, hallucination detection, bias &amp; cost observability</li>
             <li>Lead POC delivery, mentor juniors, run GenAI + AI security knowledge transfer</li>
           </ul>
@@ -561,7 +662,7 @@ language switches, or markdown injection.</pre>
           <div class="role__co">Full-time</div>
           <ul class="role__bullets">
             <li>PowerShell scripting for deployment in Azure Dev/Test Labs</li>
-            <li>Streamlined Azure deployments end-to-end</li>
+            <li>Streamlined Azure deployments end to end</li>
             <li>Built CI/CD environments, agile with dev + IT teams</li>
           </ul>
         </li>
@@ -571,8 +672,8 @@ language switches, or markdown injection.</pre>
           <h3 class="role__title">IT Analyst / Azure Admin</h3>
           <div class="role__co">ABELDent</div>
           <ul class="role__bullets">
-            <li>Tier-3 root-cause analysis, escalation to QA/Dev</li>
-            <li>AD / AzureAD / O365 + ad-hoc PowerShell (Az module)</li>
+            <li>Tier 3 root cause analysis, escalation to QA/Dev</li>
+            <li>AD / AzureAD / O365 + ad hoc PowerShell (Az module)</li>
             <li>Azure Service Bus, Log Analytics, Application Insights</li>
             <li>MS SQL Server, Windows Server, TFS in Azure DevOps</li>
           </ul>
@@ -595,10 +696,10 @@ language switches, or markdown injection.</pre>
   <!-- ============================== 005 · STACK ============================== -->
   <section class="section" id="stack" aria-labelledby="stack-title">
     <header class="sec-head wrap">
-      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>005 / Stack</span></p>
+      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>006 / Stack</span></p>
       <div>
         <h2 class="sec-title" id="stack-title" data-split>Tools I reach<br>for, <em>daily</em>.</h2>
-        <p class="sec-sub" data-reveal>Grouped by job. Nothing here is résumé-padding · each bucket is something I've shipped or broken in the last 12 months.</p>
+        <p class="sec-sub" data-reveal>Grouped by job. Nothing here is résumé padding · each bucket is something I've shipped or broken in the last 12 months.</p>
       </div>
     </header>
     <div class="wrap">
@@ -613,7 +714,7 @@ language switches, or markdown injection.</pre>
         </div>
         <div class="scell">
           <div class="scell__head"><span class="scell__name">RAG</span><span class="mono-label">03 / 06</span></div>
-          <div class="chips"><span class="chip">Hybrid Search</span><span class="chip">Dense Embed</span><span class="chip">BM25</span><span class="chip">Semantic Chunking</span><span class="chip">Cross-Encoder</span><span class="chip">HyDE</span><span class="chip">pgvector</span><span class="chip">Pinecone</span><span class="chip">Azure AI Search</span><span class="chip">FAISS</span><span class="chip">ChromaDB</span></div>
+          <div class="chips"><span class="chip">Hybrid Search</span><span class="chip">Dense Embed</span><span class="chip">BM25</span><span class="chip">Semantic Chunking</span><span class="chip">Cross Encoder</span><span class="chip">HyDE</span><span class="chip">pgvector</span><span class="chip">Pinecone</span><span class="chip">Azure AI Search</span><span class="chip">FAISS</span><span class="chip">ChromaDB</span></div>
         </div>
         <div class="scell">
           <div class="scell__head"><span class="scell__name">AI Security</span><span class="mono-label">04 / 06</span></div>
@@ -634,7 +735,7 @@ language switches, or markdown injection.</pre>
   <!-- ============================== 006 · CERTS ============================== -->
   <section class="section" id="certs" aria-labelledby="certs-title">
     <header class="sec-head wrap">
-      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>006 / Credentials</span></p>
+      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>007 / Credentials</span></p>
       <div>
         <h2 class="sec-title" id="certs-title" data-split>Eight badges,<br>one <em>obsession</em>.</h2>
         <p class="sec-sub" data-reveal>Azure, NVIDIA, Cisco, CompTIA. Useful for passing procurement. More useful for the muscle memory each one leaves behind.</p>
@@ -657,7 +758,7 @@ language switches, or markdown injection.</pre>
   <!-- ============================== 007 · CONTACT ============================== -->
   <section class="contact" id="contact" aria-labelledby="contact-title">
     <div class="wrap">
-      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>007 / End transmission</span></p>
+      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>008 / End transmission</span></p>
       <h2 class="contact__big" id="contact-title">Let's build<br>something<br><em>unbreakable.</em></h2>
       <div class="clinks">
         <a class="clink" href="mailto:harnoor24@outlook.com" data-cursor="Write">
@@ -671,7 +772,8 @@ language switches, or markdown injection.</pre>
         </a>
       </div>
       <div class="contact__row">
-        <button class="btn" type="button" data-copy-email data-magnetic="0.2">Copy email</button>
+        <a class="cta" href="mailto:harnoor24@outlook.com">Get in touch <span class="cta__arr" aria-hidden="true">→</span></a>
+        <button class="btn" type="button" data-copy-email>Copy email</button>
         <span class="mono-label">Toronto, CA · Eastern Time</span>
       </div>
     </div>
@@ -680,7 +782,7 @@ language switches, or markdown injection.</pre>
 
 <footer class="footer wrap">
   <div class="grp"><span>© 2026 Harnoor Singh</span><span>Cloud &amp; AI Engineer / Red Teamer</span></div>
-  <div class="grp"><a href="/play">Arcade</a><a href="/writing/how-agents-actually-remember">Field notes</a><span data-clock>TOR --:--</span><span>v4.0.0</span><a href="#top">Back to top ↑</a></div>
+  <div class="grp"><a href="/play">Arcade</a><a href="/writing/how-agents-actually-remember">Field notes</a><a href="/privacy">Privacy</a><span data-clock>TOR --:--</span><span>v4.0.0</span><a href="#top">Back to top ↑</a></div>
 </footer>
 
 <!-- cursor -->

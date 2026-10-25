@@ -195,12 +195,13 @@ function initPalette() {
   const cmds = [
     { g: 'Navigate', label: 'Top', kbd: '↑', run: go('#top') },
     { g: 'Navigate', label: 'Live demo · jailbreak the toy bank agent', kbd: '01', run: go('#playground') },
-    { g: 'Navigate', label: 'Signals · red-team scorecard', kbd: '02', run: go('#signals') },
-    { g: 'Navigate', label: 'Work · selected systems', kbd: '03', run: go('#work') },
-    { g: 'Navigate', label: 'Experience · trajectory', kbd: '04', run: go('#experience') },
-    { g: 'Navigate', label: 'Stack · tools I reach for', kbd: '05', run: go('#stack') },
-    { g: 'Navigate', label: 'Credentials', kbd: '06', run: go('#certs') },
-    { g: 'Navigate', label: 'Contact', kbd: '07', run: go('#contact') },
+    { g: 'Navigate', label: 'How I work · map, break, harden', kbd: '02', run: go('#method') },
+    { g: 'Navigate', label: 'Signals · red team scorecard', kbd: '03', run: go('#signals') },
+    { g: 'Navigate', label: 'Work · selected systems', kbd: '04', run: go('#work') },
+    { g: 'Navigate', label: 'Experience · trajectory', kbd: '05', run: go('#experience') },
+    { g: 'Navigate', label: 'Stack · tools I reach for', kbd: '06', run: go('#stack') },
+    { g: 'Navigate', label: 'Credentials', kbd: '07', run: go('#certs') },
+    { g: 'Navigate', label: 'Get in touch', kbd: '08', run: go('#contact') },
     { g: 'Read & play', label: 'Field Notes 001 · How agents actually remember', kbd: 'W', run: () => { window.location.href = '/writing/how-agents-actually-remember'; } },
     { g: 'Read & play', label: 'Arcade · Packet', kbd: 'A', run: () => { window.location.href = '/play'; } },
     { g: 'Contact', label: 'Copy email address', kbd: 'C', run: copyEmail },
@@ -672,19 +673,87 @@ function initReveals() {
       },
     });
   });
-  if (reduceMotion) return;
-  // paragraphs / blocks
-  $$('[data-reveal]').forEach((el) => {
-    gsap.from(el, { y: 44, opacity: 0, duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
-  });
-  // staggered groups
-  $$('[data-stagger]').forEach((group) => {
-    const kids = Array.from(group.children);
-    gsap.from(kids, {
-      y: 36, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.07,
-      scrollTrigger: { trigger: group, start: 'top 88%', once: true },
+}
+
+// Blocks rise out of a blur as they enter the viewport. IntersectionObserver
+// only (no scroll listeners); CSS owns the easing. Runs before fonts load so
+// anything already on screen reveals straight away.
+function initRevealObserver() {
+  const blocks = $$('[data-reveal]');
+  const groups = $$('[data-stagger]');
+  groups.forEach((g) => Array.from(g.children).forEach((c, i) => c.style.setProperty('--i', String(i))));
+  const show = (t) => {
+    if (t.hasAttribute('data-stagger')) Array.from(t.children).forEach((c) => c.classList.add('is-in'));
+    else t.classList.add('is-in');
+  };
+  if (reduceMotion || !('IntersectionObserver' in window)) { [...blocks, ...groups].forEach(show); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      show(e.target);
+      io.unobserve(e.target);
     });
-  });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.06 });
+  [...blocks, ...groups].forEach((el) => io.observe(el));
+}
+
+// ------------------------------------------------------------------ tagline: word by word
+function initTagline() {
+  const el = $('[data-tagline]');
+  if (!el) return;
+  const words = [];
+  const split = (node) => {
+    Array.from(node.childNodes).forEach((n) => {
+      if (n.nodeType === Node.TEXT_NODE) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.append(part); return; }
+          const w = document.createElement('span');
+          w.className = 'w';
+          w.textContent = part;
+          frag.append(w);
+          words.push(w);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === Node.ELEMENT_NODE) split(n);
+    });
+  };
+  split(el);
+  if (reduceMotion) { words.forEach((w) => w.classList.add('is-on')); return; }
+  // reading order, one word at a time as the block crosses the trigger line
+  let lit = -1;
+  const paint = (p) => {
+    const n = Math.round(clamp(p, 0, 1) * words.length);
+    if (n === lit) return;
+    lit = n;
+    words.forEach((w, i) => w.classList.toggle('is-on', i < n));
+  };
+  ScrollTrigger.create({ trigger: el, start: 'top 78%', end: 'bottom 40%', onUpdate: (s) => paint(s.progress), onRefresh: (s) => paint(s.progress) });
+}
+
+// ------------------------------------------------------------------ how I work: steps drive the diagram
+function initMethod() {
+  const viz = $('.mviz');
+  const steps = $$('.mstep');
+  if (!viz || !steps.length) return;
+  const set = (n) => {
+    viz.dataset.state = String(n);
+    steps.forEach((s) => s.classList.toggle('is-active', s.dataset.step === String(n)));
+  };
+  set(1);
+  if (reduceMotion || !('IntersectionObserver' in window)) { viz.classList.add('is-drawn'); return; }
+  const drawIO = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { viz.classList.add('is-drawn'); drawIO.disconnect(); }
+  }, { threshold: 0.2 });
+  drawIO.observe(viz);
+  // Watch each step's text, not its tall row, against a thin trigger band:
+  // mid-screen on desktop, in the visible strip below the pinned diagram on phones.
+  const narrow = window.matchMedia('(max-width: 960px)').matches;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) set(e.target.closest('.mstep').dataset.step); });
+  }, { rootMargin: narrow ? '-70% 0px -28% 0px' : '-48% 0px -50% 0px' });
+  steps.forEach((s) => io.observe($('.mstep__in', s) || s));
 }
 
 // ------------------------------------------------------------------ signals scorecard
@@ -908,6 +977,7 @@ function init() {
   safe('links', initLinks);
   safe('palette', initPalette);
   safe('playground', () => initPlayground({ toast, reduceMotion }));
+  safe('reveal-observer', initRevealObserver);
 
   if (!hasGSAP) { fallback(); return; }
   gsap.registerPlugin(ScrollTrigger);
@@ -933,7 +1003,8 @@ function init() {
   fontsReady().then(async () => {
     const steps = [
       ['hero-scroll', initHeroScroll], ['work', initWork], ['marquee', initMarquee],
-      ['reveals', initReveals], ['scorecard', initScorecard], ['experience', initExperience],
+      ['reveals', initReveals], ['tagline', initTagline], ['method', initMethod],
+      ['scorecard', initScorecard], ['experience', initExperience],
       ['stack', initStack], ['certs', initCerts], ['contact', initContact],
     ];
     for (const [name, fn] of steps) {
