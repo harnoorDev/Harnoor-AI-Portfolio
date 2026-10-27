@@ -13,7 +13,7 @@ const hasGSAP = !!(gsap && ScrollTrigger);
 
 const EMAIL = 'harnoor24@outlook.com';
 const ACCENTS = ['ember', 'acid', 'plasma', 'phosphor', 'cyan'];
-const state = { lenis: null, bg: null, heroIntro: null };
+const state = { lenis: null, bg: null, heroIntro: null, scope: null };
 
 // ------------------------------------------------------------------ helpers
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -85,6 +85,7 @@ function applyTheme(t) {
   if (meta) meta.setAttribute('content', t === 'light' ? '#f4f1e8' : '#0a0a09');
   state.bg?.setTheme(t);
   state.bg?.setAccent(currentAccentHex());
+  state.scope?.setAccent(phosphorHex());
 }
 function toggleTheme(origin) {
   const next = d.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -110,6 +111,7 @@ function setAccent(name) {
   store.set('accent', name);
   state.bg?.setAccent(currentAccentHex());
   state.bg?.burst(2);
+  state.scope?.setAccent(phosphorHex());
 }
 function cycleAccent() {
   const cur = d.getAttribute('data-accent') || 'ember';
@@ -756,41 +758,81 @@ function initMethod() {
   steps.forEach((s) => io.observe($('.mstep__in', s) || s));
 }
 
-// ------------------------------------------------------------------ signals scorecard
-function initScorecard() {
-  const rows = $$('.score__row');
-  const counter = $('#scoreCount');
-  if (!rows.length) return;
-  const total = rows.length;
-  let broken = 0;
-  let queue = Promise.resolve();
-  const breakRow = (row) => new Promise((resolve) => {
-    const bar = $('.score__bar i', row), stamp = $('.score__stamp', row), model = $('.score__model', row);
-    gsap.timeline({ onComplete: resolve })
-      .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: 'power3.inOut' })
-      .add(() => {
-        row.classList.add('is-broken', 'is-flash');
-        broken++;
-        if (counter) counter.textContent = `${pad(broken)} / ${pad(total)} breached`;
-        if (model) { model.classList.add('glitch', 'is-glitching'); model.dataset.text = model.textContent; setTimeout(() => model.classList.remove('is-glitching'), 650); }
-      })
-      .fromTo(stamp, { opacity: 0, scale: 1.9, rotate: -18 }, { opacity: 1, scale: 1, rotate: -4, duration: 0.42, ease: 'back.out(2.6)' }, '<');
-  });
-  if (reduceMotion) {
-    rows.forEach((r) => r.classList.add('is-broken'));
-    if (counter) counter.textContent = `${pad(total)} / ${pad(total)} breached`;
-    return;
-  }
-  if (counter) counter.textContent = `00 / ${pad(total)} breached`;
-  rows.forEach((row) => {
-    gsap.set(row, { opacity: 0, y: 26 });
-    ScrollTrigger.create({
-      trigger: row, start: 'top 84%', once: true,
-      onEnter: () => {
-        gsap.to(row, { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out' });
-        queue = queue.then(() => breakRow(row));
+// ------------------------------------------------------------------ receipts: the models I broke, as a kinetic reel
+// Pinned and scrubbed. Each model slams in, gets struck through and stamped,
+// then clears for the next; the reel ends on "Safe → Tested.". Without
+// motion it stays the plain list the markup already is.
+function initReceipts() {
+  const root = $('.receipts');
+  const items = root ? $$('.rc', root) : [];
+  if (!items.length) return;
+  const N = items.length;
+  const countEl = $('[data-rc-count]', root), list = $('.receipts__list', root), flash = $('.receipts__flash', root);
+  const safeEl = $('.rc-final__safe', root), strikeEl = $('.rc-final__safe i', root), testedEl = $('.rc-final__tested', root);
+  const lines = items.map((rc) => $('.rc__line', rc));
+  // each name fills the frame width, capped by the frame height
+  const fit = () => {
+    // measured from the viewport, not the list: the list may be pinned at a stale width
+    const inset = parseFloat(getComputedStyle(items[0]).paddingLeft) || 0;
+    const frame = Math.min(document.documentElement.clientWidth, parseFloat(getComputedStyle(list).maxWidth) || Infinity);
+    const avail = Math.max(200, frame - inset * 2) * 0.9;
+    const cap = Math.min(340, window.innerHeight * 0.36);
+    lines.forEach((ln) => {
+      const name = ln && $('.rc__name', ln);
+      if (!name) return;
+      ln.style.fontSize = '100px';
+      const w = name.offsetWidth || 1;
+      ln.style.fontSize = `${clamp((avail * 100) / w, 40, cap).toFixed(1)}px`;
+    });
+  };
+  gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+    root.classList.add('is-kinetic');
+    fit();
+    ScrollTrigger.addEventListener('refreshInit', fit);
+    let shown = -1;
+    const tl = gsap.timeline({
+      onUpdate() {
+        // a model counts as breached once its stamp lands
+        const n = clamp(Math.floor(this.time() - 0.36) + 1, 0, N);
+        if (n !== shown && countEl) { shown = n; countEl.textContent = pad(n); }
       },
     });
+    items.forEach((rc, t) => {
+      const name = $('.rc__name', rc), how = $('.rc__how', rc), stamp = $('.rc__stamp', rc);
+      tl.fromTo(name,
+        { yPercent: 120, scaleX: 0.86, scaleY: 1.7, skewY: -6, opacity: 0, filter: 'blur(12px)', '--strike': 0 },
+        { yPercent: 0, scaleX: 1, scaleY: 1, skewY: 0, opacity: 1, filter: 'blur(0px)', duration: 0.32, ease: 'back.out(2.2)' }, t)
+        .fromTo(how, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.2, ease: 'power3.out' }, t + 0.16)
+        .to(name, { '--strike': 1, duration: 0.08, ease: 'power2.in' }, t + 0.3)
+        .fromTo(stamp, { opacity: 0, scale: 2.4, rotate: -26 }, { opacity: 1, scale: 1, rotate: -8, duration: 0.12, ease: 'back.out(3)' }, t + 0.36)
+        // impact: squash, red flash, a jolt through the frame
+        .to(name, { scaleX: 1.05, scaleY: 0.9, duration: 0.04, ease: 'power2.out' }, t + 0.38)
+        .to(name, { scaleX: 1, scaleY: 1, duration: 0.16, ease: 'back.out(4)' }, t + 0.42)
+        .fromTo(flash, { opacity: 0 }, { opacity: 0.3, duration: 0.02, immediateRender: false }, t + 0.38)
+        .to(flash, { opacity: 0, duration: 0.2, ease: 'power2.out' }, t + 0.4)
+        .fromTo(list, { x: 0, skewX: 0 }, { x: 14, skewX: -3, duration: 0.025, immediateRender: false }, t + 0.38)
+        .to(list, { x: -8, skewX: 2, duration: 0.03 }, t + 0.405)
+        .to(list, { x: 0, skewX: 0, duration: 0.08, ease: 'power2.out' }, t + 0.435)
+        .call(() => state.bg?.burst?.(1.2), null, t + 0.38)
+        .to(name, { yPercent: -115, opacity: 0, filter: 'blur(10px)', duration: 0.18, ease: 'power2.in' }, t + 0.8)
+        .to([how, stamp], { opacity: 0, duration: 0.14 }, t + 0.8);
+    });
+    tl.fromTo(safeEl, { yPercent: 70, opacity: 0, '--dim': 0 }, { yPercent: 0, opacity: 1, duration: 0.25, ease: 'expo.out' }, N)
+      .fromTo(strikeEl, { scaleX: 0 }, { scaleX: 1, duration: 0.18, ease: 'power3.inOut' }, N + 0.3)
+      .to(safeEl, { '--dim': 1, duration: 0.12 }, N + 0.5)
+      .fromTo(testedEl, { yPercent: 90, scaleY: 1.6, opacity: 0 }, { yPercent: 0, scaleY: 1, opacity: 1, duration: 0.3, ease: 'back.out(2.2)' }, N + 0.55)
+      .call(() => state.bg?.burst?.(2.2), null, N + 0.6)
+      .to({}, { duration: 0.6 }, N + 0.9);
+    ScrollTrigger.create({
+      trigger: root, start: 'top top', end: () => `+=${Math.round((N + 1.5) * window.innerHeight * 0.45)}`,
+      pin: true, scrub: 0.6, animation: tl, anticipatePin: 1, invalidateOnRefresh: true,
+    });
+    return () => {
+      ScrollTrigger.removeEventListener('refreshInit', fit);
+      lines.forEach((ln) => { if (ln) ln.style.fontSize = ''; });
+      root.classList.remove('is-kinetic');
+      if (countEl) countEl.textContent = pad(N);
+    };
   });
 }
 
@@ -857,10 +899,281 @@ function initWork() {
   }
 }
 
-// ------------------------------------------------------------------ experience: odometer + timeline
+// ------------------------------------------------------------------ experience: oscilloscope
+// The career ladder drawn as a phosphor square wave: one rising edge per
+// role, with a little ringing after each promotion. A beam sweeps the trace
+// while it is on screen; the cursor follows the role being read.
+const PHOSPHOR = { ember: '#ff6a3d', acid: '#e7ff52', plasma: '#ff2e7e', phosphor: '#3dff9b', cyan: '#4ee9f5' };
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+// the screen is always dark, so it always takes the bright (dark theme) accent
+function phosphorHex() { return PHOSPHOR[d.getAttribute('data-accent') || 'ember'] || PHOSPHOR.ember; }
+function roleStart(role) {
+  const txt = Array.from(role.querySelectorAll('.role__period span'), (el) => el.textContent).find((t) => /\d{4}/.test(t)) || '';
+  const m = txt.match(/(?:([A-Za-z]{3})[a-z]*\.?\s+)?(\d{4})/);
+  if (!m) return Number(role.dataset.year) || 2020;
+  return Number(m[2]) + Math.max(0, m[1] ? MONTHS.indexOf(m[1].toLowerCase()) : 0) / 12;
+}
+
+function createScope(screen, roles) {
+  const canvas = $('.scope__cv', screen);
+  const ctx = canvas && canvas.getContext('2d');
+  if (!ctx) return null;
+  const steps = roles
+    .map((r, dom) => ({ dom, x: roleStart(r), title: ($('.role__title', r)?.textContent || '').trim() }))
+    .sort((a, b) => a.x - b.x)
+    .map((st, k) => ({ ...st, level: k + 1 }));
+  const L = steps.length;
+  const today = new Date();
+  const X1 = Math.max(steps[L - 1].x + 0.5, today.getFullYear() + today.getMonth() / 12 + 0.1);
+  const span = Math.max(10, Math.ceil(X1 - (steps[0].x - 0.2))); // one division per year
+  const X0 = X1 - span;
+  const ROWS = 8;
+
+  let W = 0, H = 0, dpr = 1, ink = [255, 106, 61];
+  let pts = [], cum = [], total = 1, grid = null;
+  let drawn = reduceMotion ? 1 : 0, started = reduceMotion, doneAt = -1;
+  let visible = false, raf = 0, last = 0, clock = 0;
+  let active = Math.max(0, steps.findIndex((st) => st.dom === 0));
+  let curX = -1, curY = -1;
+
+  const xs = (x) => ((x - X0) / span) * W;
+  const ys = (lv) => H * (0.82 - (lv / L) * 0.62);
+  const rgba = (a) => `rgba(${ink[0]},${ink[1]},${ink[2]},${a})`;
+  const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+
+  function setInk(hex) {
+    let h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    const n = parseInt(h, 16);
+    if (h.length !== 6 || Number.isNaN(n)) return;
+    ink = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    screen.style.setProperty('--phosphor', `#${h}`);
+  }
+
+  // the trace as a polyline in CSS pixels, plus its running length
+  function build() {
+    pts = [];
+    const edges = [X0, ...steps.map((st) => st.x), X1];
+    const amp = (ys(0) - ys(1)) * 0.34, decay = 12, freq = (Math.PI * 2) / 15;
+    for (let j = 0; j < edges.length - 1; j++) {
+      const a = xs(edges[j]), b = xs(edges[j + 1]), y = ys(j);
+      for (let px = a; px < b; px += 2) {
+        const dx = px - a;
+        pts.push([px, j > 0 ? y - amp * Math.exp(-dx / decay) * Math.cos(dx * freq) : y]);
+      }
+      pts.push([b, y]);
+    }
+    cum = [0];
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    total = cum[cum.length - 1] || 1;
+  }
+
+  function pointAt(len) {
+    const l = clamp(len, 0, total);
+    let lo = 0, hi = cum.length - 1;
+    while (lo < hi - 1) { const mid = (lo + hi) >> 1; if (cum[mid] <= l) lo = mid; else hi = mid; }
+    const seg = cum[hi] - cum[lo] || 1, f = (l - cum[lo]) / seg;
+    return [pts[lo][0] + (pts[hi][0] - pts[lo][0]) * f, pts[lo][1] + (pts[hi][1] - pts[lo][1]) * f, lo];
+  }
+
+  // graticule: dotted divisions, a ticked centre cross, cached until resize
+  function buildGrid() {
+    grid = grid || document.createElement('canvas');
+    grid.width = canvas.width; grid.height = canvas.height;
+    const g = grid.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+    g.lineWidth = 1;
+    g.strokeStyle = rgba(0.16);
+    g.setLineDash([1, 4]);
+    g.beginPath();
+    for (let i = 1; i < span; i++) { const x = Math.round((i * W) / span) + 0.5; g.moveTo(x, 0); g.lineTo(x, H); }
+    for (let j = 1; j < ROWS; j++) { const y = Math.round((j * H) / ROWS) + 0.5; g.moveTo(0, y); g.lineTo(W, y); }
+    g.stroke();
+    g.setLineDash([]);
+    g.strokeStyle = rgba(0.2);
+    g.beginPath();
+    const cx = Math.round(W / 2) + 0.5, cy = Math.round(H / 2) + 0.5;
+    g.moveTo(cx, 0); g.lineTo(cx, H); g.moveTo(0, cy); g.lineTo(W, cy);
+    for (let i = 1; i < span * 5; i++) { const x = Math.round((i * W) / (span * 5)) + 0.5; g.moveTo(x, cy - 3); g.lineTo(x, cy + 3); }
+    for (let j = 1; j < ROWS * 5; j++) { const y = Math.round((j * H) / (ROWS * 5)) + 0.5; g.moveTo(cx - 3, y); g.lineTo(cx + 3, y); }
+    g.stroke();
+  }
+
+  function strokeTo(len, width, alpha) {
+    const end = pointAt(len);
+    ctx.lineWidth = width;
+    ctx.strokeStyle = rgba(alpha);
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i <= end[2]; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.lineTo(end[0], end[1]);
+    ctx.stroke();
+  }
+
+  function glowDot(x, y, r, a) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, rgba(a));
+    g.addColorStop(0.25, rgba(a * 0.45));
+    g.addColorStop(1, rgba(0));
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  function render(dt) {
+    if (!W || !H) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    if (grid) ctx.drawImage(grid, 0, 0, W, H);
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.globalCompositeOperation = 'lighter';
+
+    // CH2: a quiet noise floor
+    const base = H - 44;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = rgba(0.28);
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 3) {
+      const n = Math.sin(x * 0.11 + clock * 7) * 0.6 + Math.sin(x * 0.37 - clock * 11) * 0.4 + Math.sin(x * 1.3 + clock * 23) * 0.25;
+      const y = base + n * (reduceMotion ? 1.2 : 2.2);
+      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // CH1: the ladder, drawn up to the beam on first view
+    const e = 1 - Math.pow(1 - drawn, 3);
+    const upto = e * total;
+    if (upto > 0) {
+      strokeTo(upto, 7, 0.06);
+      strokeTo(upto, 3, 0.16);
+      strokeTo(upto, 1.4, 0.92);
+    }
+    // the beam: the drawing head on first view, then a sweep every few seconds
+    let head = -1;
+    if (!reduceMotion) {
+      if (drawn < 1) head = started ? upto : -1;
+      else {
+        if (doneAt < 0) doneAt = clock;
+        const p = ((clock - doneAt) % 4.2) / 3.2;
+        if (p <= 1) head = (1 - Math.pow(1 - p, 2)) * total;
+      }
+    }
+    if (head > 0) {
+      const tail = Math.min(140, head), stepsN = 14;
+      let prev = pointAt(head - tail);
+      ctx.lineWidth = 2.6;
+      for (let k = 1; k <= stepsN; k++) {
+        const pt = pointAt(head - tail + (tail * k) / stepsN);
+        ctx.strokeStyle = rgba(0.85 * (k / stepsN) ** 2);
+        ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(pt[0], pt[1]); ctx.stroke();
+        prev = pt;
+      }
+      const hp = pointAt(head);
+      glowDot(hp[0], hp[1], 16, 0.9);
+    }
+
+    // the cursor on the role being read
+    const st = steps[active];
+    const tx = xs(st.x), ty = ys(st.level);
+    const k = reduceMotion || curX < 0 ? 1 : 1 - Math.exp(-dt * 7);
+    curX = curX < 0 ? tx : curX + (tx - curX) * k;
+    curY = curY < 0 ? ty : curY + (ty - curY) * k;
+    const ca = smooth(0.8, 1, drawn);
+    if (ca > 0) {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.setLineDash([3, 4]);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = rgba(0.45 * ca);
+      ctx.beginPath(); ctx.moveTo(Math.round(curX) + 0.5, 0); ctx.lineTo(Math.round(curX) + 0.5, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, Math.round(curY) + 0.5); ctx.lineTo(curX, Math.round(curY) + 0.5); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalCompositeOperation = 'lighter';
+      glowDot(curX, curY, 14, 0.8 * ca);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = rgba(ca);
+      ctx.beginPath(); ctx.arc(curX, curY, 5, 0, Math.PI * 2); ctx.stroke();
+      // label: level + title, kept inside the screen
+      const fs = W < 420 ? 10 : 11;
+      ctx.font = `500 ${fs}px "JetBrains Mono", ui-monospace, monospace`;
+      const label = `L${st.level} · ${st.title}`.toUpperCase();
+      const tw = ctx.measureText(label).width;
+      const right = curX > W * 0.55;
+      let lx = right ? curX - 12 - tw : curX + 12;
+      lx = clamp(lx, 8, W - 8 - tw);
+      const ly = clamp(curY - 14, 50, H - 60);
+      ctx.fillStyle = `rgba(11,9,6,${0.72 * ca})`;
+      ctx.fillRect(lx - 6, ly - fs - 3, tw + 12, fs + 9);
+      ctx.fillStyle = rgba(ca);
+      ctx.fillText(label, lx, ly);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function frame(now) {
+    raf = 0;
+    const t = now / 1000;
+    const dt = last ? Math.min(0.05, t - last) : 1 / 60;
+    last = t;
+    clock += dt;
+    if (started && drawn < 1) drawn = Math.min(1, drawn + dt / 2.4);
+    render(dt);
+    if (visible && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  function wake() {
+    if (reduceMotion) { render(1); return; }
+    if (!raf && visible && !document.hidden) { last = 0; raf = requestAnimationFrame(frame); }
+  }
+
+  function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = w; H = h;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    build();
+    buildGrid();
+    curX = -1; curY = -1;
+    render(1);
+  }
+
+  setInk(phosphorHex());
+  if ('ResizeObserver' in window) new ResizeObserver(resize).observe(canvas);
+  else window.addEventListener('resize', resize);
+  resize();
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      visible = entries.some((en) => en.isIntersecting);
+      if (visible) started = true;
+      wake();
+    }, { threshold: 0.15 }).observe(screen);
+  } else { visible = true; started = true; wake(); }
+  document.addEventListener('visibilitychange', wake);
+
+  return {
+    setActive(dom) {
+      const k = steps.findIndex((st) => st.dom === dom);
+      if (k < 0 || k === active) return;
+      active = k;
+      if (!raf) { curX = -1; curY = -1; render(1); }
+    },
+    setAccent(hex) {
+      setInk(hex);
+      if (W) { buildGrid(); if (!raf) render(1); }
+    },
+  };
+}
+
+// ------------------------------------------------------------------ experience: scope + odometer + timeline
 function initExperience() {
   const roles = $$('.role');
   if (!roles.length) return;
+  const screen = $('.scope__screen');
+  if (screen) {
+    try { state.scope = createScope(screen, roles); } catch (err) { console.warn('[scope]', err); }
+  }
   const digits = $$('.odo__d');
   const idxEl = $('#expIdx'), coEl = $('#expCo');
   let current = -1;
@@ -876,6 +1189,7 @@ function initExperience() {
     });
     if (idxEl) idxEl.textContent = pad(i + 1);
     if (coEl) scramble(coEl, roles[i].dataset.co || '', { speed: 0.5 });
+    state.scope?.setActive(i);
   };
   setRole(0);
   roles.forEach((role, i) => {
@@ -952,6 +1266,61 @@ function initContact() {
   gsap.from('.clink', { y: 40, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: '.clinks', start: 'top 92%', once: true } });
 }
 
+// ------------------------------------------------------------------ finale: the name rises out of the page
+function initFinale() {
+  const word = $('.finale__word');
+  if (!word || reduceMotion || !SplitText) return;
+  SplitText.create(word, {
+    type: 'chars', autoSplit: true,
+    onSplit: (self) => gsap.fromTo(self.chars, { yPercent: 108, rotate: 7 }, {
+      yPercent: 0, rotate: 0, ease: 'power3.out', stagger: 0.06,
+      scrollTrigger: { trigger: '.finale', start: 'top 96%', end: 'bottom bottom', scrub: 0.8 },
+    }),
+  });
+}
+
+// ------------------------------------------------------------------ reel frame: scene slate + timecode
+// The page plays like a showreel: a scene slate per section and a timecode
+// that runs with the scroll (the whole page is a two and a half minute reel).
+const REEL_SCENES = [
+  ['#top', 'Intro'], ['#playground', 'Live demo'], ['#method', 'How I work'], ['#signals', 'Receipts'], ['#work', 'Selected work'],
+  ['#experience', 'Trajectory'], ['#stack', 'Stack'], ['#certs', 'Credentials'], ['#contact', 'End transmission'],
+];
+const REEL_SECONDS = 150;
+function initReel() {
+  const reel = $('.reel');
+  if (!reel) return;
+  const sceneEl = $('[data-reel-scene]', reel), tcEl = $('[data-reel-tc]', reel);
+  let shown = -1, lastTc = '', tops = [];
+  const setScene = (i) => {
+    if (i === shown || !sceneEl) return;
+    shown = i;
+    scramble(sceneEl, `SC ${pad(i + 1)} · ${REEL_SCENES[i][1]}`, { speed: 0.5 });
+  };
+  // the scene is whichever section owns the middle of the screen; tops are
+  // re-measured after each refresh so pin spacers are counted
+  const measure = () => {
+    tops = REEL_SCENES.map(([sel]) => {
+      const el = $(sel);
+      return el ? el.getBoundingClientRect().top + window.scrollY : Infinity;
+    });
+  };
+  const update = (y, progress) => {
+    reel.classList.toggle('is-rolling', y > window.innerHeight * 0.4);
+    const mid = y + window.innerHeight * 0.5;
+    let i = 0;
+    while (i < tops.length - 1 && mid >= tops[i + 1]) i++;
+    setScene(i);
+    const t = progress * REEL_SECONDS;
+    const tc = `TC 00:${pad(Math.floor(t / 60))}:${pad(Math.floor(t) % 60)}:${pad(Math.floor((t % 1) * 24))}`;
+    if (tc !== lastTc && tcEl) { lastTc = tc; tcEl.textContent = tc; }
+  };
+  const st = ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (self) => update(self.scroll(), self.progress) });
+  ScrollTrigger.addEventListener('refresh', () => { measure(); update(st.scroll(), st.progress); });
+  measure();
+  update(window.scrollY, st.progress);
+}
+
 // ------------------------------------------------------------------ boot sequence
 function fontsReady() {
   const fonts = document.fonts?.ready || Promise.resolve();
@@ -994,23 +1363,26 @@ function init() {
   window.__siteReady = true;
 
   // Section setup is chunked: yield to the main thread between sections so
-  // input stays responsive (no single long task). The pin goes first so the
-  // triggers created after it measure the page with its spacer in place.
+  // input stays responsive (no single long task). The two pins go first, top
+  // to bottom, so the triggers created after them measure the page with
+  // their spacers in place.
   const yieldToMain = () => new Promise((r) => {
     if (window.scheduler && typeof window.scheduler.yield === 'function') window.scheduler.yield().then(r);
     else setTimeout(r, 0);
   });
   fontsReady().then(async () => {
     const steps = [
-      ['hero-scroll', initHeroScroll], ['work', initWork], ['marquee', initMarquee],
+      ['hero-scroll', initHeroScroll], ['receipts', initReceipts], ['work', initWork], ['marquee', initMarquee],
       ['reveals', initReveals], ['tagline', initTagline], ['method', initMethod],
-      ['scorecard', initScorecard], ['experience', initExperience],
-      ['stack', initStack], ['certs', initCerts], ['contact', initContact],
+      ['experience', initExperience], ['stack', initStack], ['certs', initCerts],
+      ['contact', initContact], ['finale', initFinale], ['reel', initReel],
     ];
     for (const [name, fn] of steps) {
       safe(name, fn);
       await yieldToMain();
     }
+    // refresh in page order, so triggers made before a pin still see its spacer
+    ScrollTrigger.sort();
     ScrollTrigger.refresh();
     if (location.hash && document.querySelector(location.hash)) {
       requestAnimationFrame(() => scrollToTarget(location.hash));

@@ -58,6 +58,14 @@
 <div class="gridlines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
 <div class="grain" aria-hidden="true"></div>
 <div class="progress" aria-hidden="true"><i></i></div>
+<!-- reel frame: corner brackets, current scene, scroll timecode -->
+<div class="reel" aria-hidden="true">
+  <i class="reel__c reel__c--tl"></i><i class="reel__c reel__c--tr"></i><i class="reel__c reel__c--bl"></i><i class="reel__c reel__c--br"></i>
+  <div class="reel__bar mono-label">
+    <span class="reel__l"><span class="reel__rec"><i></i>Rec</span><span data-reel-scene>SC 01 · Intro</span></span>
+    <span data-reel-tc>TC 00:00:00:00</span>
+  </div>
+</div>
 
 <!-- intro: shown once per session -->
 <div id="boot" aria-hidden="true">
@@ -117,7 +125,6 @@
 
   <!-- ============================== HERO ============================== -->
   <section class="hero" id="top" aria-label="Introduction">
-    <div class="hero__frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
 
     <div class="hero__meta wrap" data-hero-fade>
       <div class="meta"><span class="mono-label">// Location</span><span class="meta__v" data-scramble-in>Toronto, CA · 43.6532°N</span></div>
@@ -336,39 +343,25 @@ language switches, or markdown injection.</pre>
       </div>
     </header>
 
-    <div class="signals wrap">
-      <div class="scorecard">
-        <div class="panel-head mono-label"><span>// Red_team.scorecard</span><span class="score__count" id="scoreCount">07 / 07 breached</span></div>
-        <div class="score__row">
-          <div><span class="score__model">Claude Opus 4.8</span><div class="score__meta">Anthropic · Prosocial framing jailbreak · &lt;24h after release</div></div>
-          <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
-        </div>
-        <div class="score__row">
-          <div><span class="score__model">Claude Opus 4.7</span><div class="score__meta">Anthropic · Cross-model attack</div></div>
-          <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
-        </div>
-        <div class="score__row">
-          <div><span class="score__model">Gemini 3.1 Pro</span><div class="score__meta">Google · Two sentence jailbreak</div></div>
-          <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
-        </div>
-        <div class="score__row">
-          <div><span class="score__model">Grok 4.20</span><div class="score__meta">xAI · Quick answer mode bypass</div></div>
-          <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
-        </div>
-        <div class="score__row">
-          <div><span class="score__model">GPT-5</span><div class="score__meta">OpenAI · Guardrail bypass</div></div>
-          <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
-        </div>
-        <div class="score__row">
-          <div><span class="score__model">Mistral</span><div class="score__meta">Mistral AI · Multiturn escalation</div></div>
-          <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
-        </div>
-        <div class="score__row">
-          <div><span class="score__model">Meta MuseSpark</span><div class="score__meta">Meta · System prompt extracted</div></div>
-          <div class="score__bar" aria-hidden="true"><i></i></div><span class="score__stamp">BROKEN</span>
-        </div>
+    <div class="receipts">
+      <h3 class="sr-only" id="rc-title">Frontier models I jailbroke in 2026</h3>
+      <div class="receipts__stage">
+        <div class="receipts__hud wrap mono-label" aria-hidden="true"><span>// red_team.reel</span><span><b data-rc-count>07</b> / 07 breached</span></div>
+        <ol class="receipts__list wrap">
+          <li class="rc"><span class="rc__line"><span class="rc__name">Claude Opus 4.8</span><span class="rc__stamp" aria-hidden="true">Breached</span></span><span class="rc__how mono-label">Anthropic · Prosocial framing jailbreak · &lt;24h after release</span></li>
+          <li class="rc"><span class="rc__line"><span class="rc__name">Claude Opus 4.7</span><span class="rc__stamp" aria-hidden="true">Breached</span></span><span class="rc__how mono-label">Anthropic · Cross model attack</span></li>
+          <li class="rc"><span class="rc__line"><span class="rc__name">Gemini 3.1 Pro</span><span class="rc__stamp" aria-hidden="true">Breached</span></span><span class="rc__how mono-label">Google · Two sentence jailbreak</span></li>
+          <li class="rc"><span class="rc__line"><span class="rc__name">Grok 4.20</span><span class="rc__stamp" aria-hidden="true">Breached</span></span><span class="rc__how mono-label">xAI · Quick answer mode bypass</span></li>
+          <li class="rc"><span class="rc__line"><span class="rc__name">GPT-5</span><span class="rc__stamp" aria-hidden="true">Breached</span></span><span class="rc__how mono-label">OpenAI · Guardrail bypass</span></li>
+          <li class="rc"><span class="rc__line"><span class="rc__name">Mistral</span><span class="rc__stamp" aria-hidden="true">Breached</span></span><span class="rc__how mono-label">Mistral AI · Multiturn escalation</span></li>
+          <li class="rc"><span class="rc__line"><span class="rc__name">Meta MuseSpark</span><span class="rc__stamp" aria-hidden="true">Breached</span></span><span class="rc__how mono-label">Meta · System prompt extracted</span></li>
+        </ol>
+        <p class="rc-final" aria-hidden="true"><span class="rc-final__safe">Safe<i></i></span><span class="rc-final__tested">Tested<b>.</b></span></p>
+        <div class="receipts__flash" aria-hidden="true"></div>
       </div>
+    </div>
 
+    <div class="signals wrap">
       <div class="feed-wrap">
         <div class="panel-head mono-label"><span>// Highlights.feed</span><span class="tag">2026</span></div>
         <div class="feed" data-stagger style="margin-top:14px">
@@ -602,13 +595,15 @@ language switches, or markdown injection.</pre>
 
     <div class="exp__grid wrap">
       <div class="exp__aside" aria-hidden="true">
-        <div class="odo">
-          <span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span>
-          <span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span>
-          <span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span>
-          <span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span>
+        <div class="scope">
+          <div class="scope__screen">
+            <canvas class="scope__cv"></canvas>
+            <div class="scope__readout"><div class="odo"><span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span><span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span><span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span><span class="odo__d"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></div></div>
+            <div class="scope__hud scope__hud--t mono-label"><span>CH1 · Career</span><span>Trig ↑ Promotion</span></div>
+            <div class="scope__hud scope__hud--b mono-label"><span>CH2 · Signal</span><span>1 div = 1 yr</span></div>
+          </div>
+          <p class="exp__now mono-label"><b id="expIdx">01</b> / 06 · <span id="expCo">Symcor</span></p>
         </div>
-        <p class="exp__now mono-label"><b id="expIdx">01</b> / 06 · <span id="expCo">Symcor</span></p>
       </div>
 
       <div class="exp__tl">
@@ -777,6 +772,7 @@ language switches, or markdown injection.</pre>
         <span class="mono-label">Toronto, CA · Eastern Time</span>
       </div>
     </div>
+    <div class="finale" aria-hidden="true"><span class="finale__word">Harnoor<i>.</i></span></div>
   </section>
 </main>
 

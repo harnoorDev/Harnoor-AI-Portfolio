@@ -22,6 +22,11 @@ Vercel function that powers the live "jailbreak a toy banking agent" demo.
   Every backdrop pauses when the tab is hidden, steps its own quality down on
   slow GPUs, refuses software renderers, and falls back (swarm/dither → fluid →
   static gradient). Reduced-motion users get the static gradient.
+- **Showreel layer** (in `main.js`): the page plays like a reel. A fixed frame
+  shows the current scene and a scroll-driven timecode; the jailbroken models
+  run as a pinned kinetic-type sequence (struck, stamped, then "Safe → Tested.");
+  the career ladder is drawn live on a canvas oscilloscope; the page ends on a
+  giant wordmark. With reduced motion each one is plain static markup.
 - **API:** `api/probe.mjs` calls Claude behind a hardened system prompt.
 - **Fonts:** Instrument Serif, Geist, JetBrains Mono, self-hosted latin subsets
   (SIL OFL 1.1) in `public/assets/fonts/`. No third-party requests at runtime,
