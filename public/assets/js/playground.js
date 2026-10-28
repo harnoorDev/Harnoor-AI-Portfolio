@@ -217,6 +217,7 @@ export function initPlayground({ toast = () => {}, reduceMotion = false } = {}) 
     els.out.setAttribute('aria-busy', 'true');
     setStatus('Probing…');
     setVerdict('idle', 'Analyzing…');
+    window.dispatchEvent(new CustomEvent('pg:state', { detail: { state: 'probing' } }));
     els.out.replaceChildren();
     const echo = document.createElement('span');
     echo.className = 'sys';
@@ -271,6 +272,8 @@ export function initPlayground({ toast = () => {}, reduceMotion = false } = {}) 
     else if (v === 'leak') { setVerdict('leak', 'LEAK · system prompt exposed'); setStatus('Leaked'); fx('LEAKED'); }
     else if (v === 'held') { setVerdict('held', 'Held · defense successful'); setStatus('Held'); }
     else { setVerdict('idle', 'No verdict'); setStatus('Idle'); }
+    // the target model's face reacts too (main.js listens)
+    window.dispatchEvent(new CustomEvent('pg:state', { detail: { state: v === 'none' ? 'guarded' : v } }));
 
     if (v === 'breach' && via === 'sim') {
       toast('Breached. Benign framing + structured output beat a rule list. <b>Stated intent is not a control.</b>');

@@ -9,24 +9,14 @@ const VS = `
 attribute vec2 aPos;
 void main () { gl_Position = vec4(aPos, 0.0, 1.0); }`;
 
-const FS = `
-precision highp float;
-uniform vec2 uRes;
+// The seven section shapes and the blend between them, shared with ascii.js.
+export const SCENE_GLSL = `
 uniform float uTime;
-uniform vec2 uCenter;
-uniform float uScale;
 uniform mat3 uRot;
 uniform float uSceneA;
 uniform float uSceneB;
 uniform float uMorph;
-uniform vec2 uPtr;
-uniform float uPtrOn;
-uniform vec3 uRipple;
 uniform float uTwist;
-uniform float uGlitch;
-uniform float uIntensity;
-uniform vec3 uInk;
-uniform vec3 uHot;
 
 float hash (vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 mat2 rot2 (float a) { float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
@@ -132,7 +122,21 @@ float map (vec3 p) {
 vec3 normal (vec3 p) {
   vec2 e = vec2(0.0025, -0.0025);
   return normalize(e.xyy * map(p + e.xyy) + e.yyx * map(p + e.yyx) + e.yxy * map(p + e.yxy) + e.xxx * map(p + e.xxx));
-}
+}`;
+
+const FS = `
+precision highp float;
+uniform vec2 uRes;
+uniform vec2 uCenter;
+uniform float uScale;
+uniform vec2 uPtr;
+uniform float uPtrOn;
+uniform vec3 uRipple;
+uniform float uGlitch;
+uniform float uIntensity;
+uniform vec3 uInk;
+uniform vec3 uHot;
+${SCENE_GLSL}
 float bayer2 (vec2 a) { a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
 float bayer4 (vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
 float bayer8 (vec2 a) { return bayer4(0.5 * a) * 0.25 + bayer2(a); }
@@ -188,14 +192,14 @@ void main () {
   gl_FragColor = col * uIntensity;
 }`;
 
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
   const h = String(hex).replace('#', '').trim();
   const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
   const n = parseInt(full, 16);
   if (Number.isNaN(n) || full.length !== 6) return [1, 0.42, 0.24];
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
-function rgbToHsv(r, g, b) {
+export function rgbToHsv(r, g, b) {
   const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
   let h = 0;
   if (d) {
@@ -204,7 +208,7 @@ function rgbToHsv(r, g, b) {
   }
   return [h, max ? d / max : 0, max];
 }
-function hsvToRgb(h, s, v) {
+export function hsvToRgb(h, s, v) {
   h = ((h % 1) + 1) % 1;
   const i = Math.floor(h * 6), f = h * 6 - i, p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
   switch (i % 6) {
@@ -213,10 +217,10 @@ function hsvToRgb(h, s, v) {
   }
 }
 // column-major 3x3 rotations
-function rotX(a) { const c = Math.cos(a), s = Math.sin(a); return [1, 0, 0, 0, c, s, 0, -s, c]; }
-function rotY(a) { const c = Math.cos(a), s = Math.sin(a); return [c, 0, -s, 0, 1, 0, s, 0, c]; }
-function rotZ(a) { const c = Math.cos(a), s = Math.sin(a); return [c, s, 0, -s, c, 0, 0, 0, 1]; }
-function mul3(A, B) {
+export function rotX(a) { const c = Math.cos(a), s = Math.sin(a); return [1, 0, 0, 0, c, s, 0, -s, c]; }
+export function rotY(a) { const c = Math.cos(a), s = Math.sin(a); return [c, 0, -s, 0, 1, 0, s, 0, c]; }
+export function rotZ(a) { const c = Math.cos(a), s = Math.sin(a); return [c, s, 0, -s, c, 0, 0, 0, 1]; }
+export function mul3(A, B) {
   const o = new Array(9);
   for (let c = 0; c < 3; c++) for (let r = 0; r < 3; r++) o[c * 3 + r] = A[r] * B[c * 3] + A[3 + r] * B[c * 3 + 1] + A[6 + r] * B[c * 3 + 2];
   return o;
@@ -224,7 +228,7 @@ function mul3(A, B) {
 
 // One scene per page section, in page order. Layout: [x, y, radius] with x in
 // half-widths, y in half-heights and radius as a fraction of screen height.
-const SCENES = [
+export const SCENES = [
   { spin: 0.12, pitch: 0.25, roll: 0, glow: 0.78, wide: [0.56, 0.02, 0.34], narrow: [0, 0.4, 0.2] },
   { spin: 0.05, pitch: 1.2, roll: 0.05, glow: 0.55, wide: [0, 0, 0.44], narrow: [0, 0.05, 0.24] },
   { spin: 0.1, pitch: 0.5, roll: 0.2, glow: 0.55, wide: [0.66, 0.02, 0.27], narrow: [0, 0.3, 0.18] },
@@ -233,7 +237,7 @@ const SCENES = [
   { spin: 0.1, pitch: 0.55, roll: 0.15, glow: 0.5, wide: [0.64, 0.05, 0.26], narrow: [0, 0.3, 0.18] },
   { spin: 0, pitch: 0.3, roll: 0, glow: 0.72, wide: [0.42, 0.02, 0.36], narrow: [0, 0.2, 0.22] },
 ];
-const UNIT_RADIUS = 0.584; // a unit sphere at the camera distance spans this many uv units
+export const UNIT_RADIUS = 0.584; // a unit sphere at the camera distance spans this many uv units
 
 export function createDither(canvas, options = {}) {
   const small = window.matchMedia('(max-width: 720px), (pointer: coarse)').matches;

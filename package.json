@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev-server.mjs",
     "dev:mock": "MOCK_PROBE=1 node scripts/dev-server.mjs",
-    "check": "node --check public/assets/js/main.js && node --check public/assets/js/fluid.js && node --check public/assets/js/swarm.js && node --check public/assets/js/dither.js && node --check public/assets/js/playground.js && node --check api/probe.mjs && node --check scripts/dev-server.mjs"
+    "check": "node --check public/assets/js/main.js && node --check public/assets/js/fluid.js && node --check public/assets/js/swarm.js && node --check public/assets/js/dither.js && node --check public/assets/js/ascii.js && node --check public/assets/js/shaderfx.js && node --check public/assets/js/face.js && node --check public/assets/js/void.js && node --check public/assets/js/ember.js && node --check public/assets/js/playground.js && node --check api/probe.mjs && node --check scripts/dev-server.mjs"
   },
   "engines": {
     "node": "24.x"

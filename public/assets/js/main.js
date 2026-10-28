@@ -13,7 +13,7 @@ const hasGSAP = !!(gsap && ScrollTrigger);
 
 const EMAIL = 'harnoor24@outlook.com';
 const ACCENTS = ['ember', 'acid', 'plasma', 'phosphor', 'cyan'];
-const state = { lenis: null, bg: null, heroIntro: null, scope: null };
+const state = { lenis: null, bg: null, heroIntro: null, scope: null, face: null, void: null, ember: null };
 
 // ------------------------------------------------------------------ helpers
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -86,6 +86,7 @@ function applyTheme(t) {
   state.bg?.setTheme(t);
   state.bg?.setAccent(currentAccentHex());
   state.scope?.setAccent(phosphorHex());
+  state.ember?.setTheme(t);
 }
 function toggleTheme(origin) {
   const next = d.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -111,7 +112,8 @@ function setAccent(name) {
   store.set('accent', name);
   state.bg?.setAccent(currentAccentHex());
   state.bg?.burst(2);
-  state.scope?.setAccent(phosphorHex());
+  const bright = phosphorHex();
+  [state.scope, state.face, state.void, state.ember].forEach((fx) => fx?.setAccent(bright));
 }
 function cycleAccent() {
   const cur = d.getAttribute('data-accent') || 'ember';
@@ -323,13 +325,14 @@ function initLenis() {
 }
 
 // ------------------------------------------------------------------ backdrop
-// Three interchangeable WebGL backdrops share one interface; the particle
+// Four interchangeable WebGL backdrops share one interface; the particle
 // swarm is the default. Pick another with ?bg= or from the palette. Anything
 // that can't run falls back to the ink fluid, then to the static CSS gradient.
 const BACKDROPS = {
   fluid: { label: 'Ink fluid', persistent: false, load: async () => (await import('./fluid.js')).createFluid },
   swarm: { label: 'Particle swarm', persistent: true, load: async () => (await import('./swarm.js')).createSwarm },
   dither: { label: '1-bit dither', persistent: true, load: async () => (await import('./dither.js')).createDither },
+  ascii: { label: 'Live ASCII', persistent: true, load: async () => (await import('./ascii.js')).createAscii },
 };
 const DEFAULT_BACKDROP = 'swarm';
 // one backdrop shape per section, in page order (stack + credentials share one)
@@ -382,13 +385,14 @@ async function initBackground() {
     // ink fluid: visible in the hero and again behind the contact finale
     let heroP = 0, contactP = 0;
     const sync = () => {
-      const o = clamp(Math.max(1 - heroP * 1.1, contactP * 0.92), 0, 1);
+      const o = clamp(Math.max(1 - heroP * 1.1, $('.contact.has-void') ? 0 : contactP * 0.92), 0, 1);
       canvas.style.opacity = o.toFixed(3);
       bg.setActive(o > 0.015);
     };
     ScrollTrigger.create({ trigger: '.hero', start: 'top top', end: 'bottom top', onUpdate: (s) => { heroP = s.progress; sync(); } });
     ScrollTrigger.create({ trigger: '.contact', start: 'top bottom', end: 'top 15%', onUpdate: (s) => { contactP = s.progress; sync(); } });
     sync();
+    state.syncBackdrop = sync; // re-run when the black hole takes over contact
     return;
   }
 
@@ -1321,6 +1325,100 @@ function initReel() {
   update(window.scrollY, st.progress);
 }
 
+// ------------------------------------------------------------------ section shaders
+// Three small WebGL scenes with their own canvases. Each module loads when its
+// section is about a screen away, renders only while on screen, draws a still
+// frame under reduced motion and leaves the plain layout in place without WebGL.
+const fxForce = new URLSearchParams(window.location.search).has('force');
+function whenNear(el, run, margin = '100% 0px') {
+  if (!el) return;
+  if (!('IntersectionObserver' in window)) { run(); return; }
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+  }, { rootMargin: margin });
+  io.observe(el);
+}
+
+// the demo's target model: a face of live code that reacts to each probe
+const FACE_LABELS = { guarded: 'Guarded', probing: 'Under attack', held: 'Held', breach: 'Breached', leak: 'Leaked' };
+function initFace() {
+  const panel = $('.pg__target');
+  const canvas = panel && $('.pg__face', panel);
+  if (!canvas) return;
+  const label = $('[data-face-state]', panel);
+  const show = (st) => {
+    panel.dataset.state = st;
+    if (label) label.textContent = FACE_LABELS[st] || FACE_LABELS.guarded;
+  };
+  import('./face.js').then(({ createFace }) => {
+    const before = document.documentElement.scrollHeight;
+    panel.hidden = false; // the canvas needs a real box before it sizes itself
+    const face = createFace(canvas, { accent: phosphorHex(), still: reduceMotion, force: fxForce });
+    if (!face) { panel.hidden = true; return; }
+    state.face = face;
+    show('guarded');
+    if (hasGSAP && document.documentElement.scrollHeight !== before) ScrollTrigger.refresh();
+    let settle = 0;
+    window.addEventListener('pg:state', (e) => {
+      const st = (e.detail && e.detail.state) || 'guarded';
+      face.setState(st);
+      show(st);
+      clearTimeout(settle);
+      if (st === 'held' || st === 'breach' || st === 'leak') {
+        settle = setTimeout(() => { face.setState('guarded'); show('guarded'); }, st === 'held' ? 2600 : 4600);
+      }
+    });
+  }).catch((err) => console.warn('[face]', err));
+}
+
+// the black hole behind "End transmission"
+function initVoid() {
+  const contact = $('.contact');
+  const canvas = contact && $('.contact__void', contact);
+  if (!canvas) return;
+  whenNear(contact, async () => {
+    let fx = null;
+    try {
+      const { createVoid } = await import('./void.js');
+      contact.classList.add('has-void'); // gives the canvas its box
+      fx = createVoid(canvas, {
+        accent: phosphorHex(), still: reduceMotion, force: fxForce,
+        onGiveUp: () => contact.classList.remove('has-void'),
+      });
+    } catch (err) { console.warn('[void]', err); }
+    if (!fx) { contact.classList.remove('has-void'); return; }
+    state.void = fx;
+    if (state.syncBackdrop) state.syncBackdrop();
+    // while the hole fills the screen the page backdrop behind it can rest
+    if (hasGSAP) {
+      ScrollTrigger.create({
+        trigger: '.contact__stage', start: 'top top', end: 'bottom bottom',
+        onToggle: (st) => { if (state.bg && d.dataset.bg !== 'fluid') state.bg.setActive(!st.isActive); },
+      });
+    }
+  });
+}
+
+// fire through fluted glass, showing only inside the closing wordmark
+function initEmber() {
+  const band = $('.finale');
+  const canvas = band && $('.finale__glass', band);
+  if (!canvas) return;
+  whenNear(band, async () => {
+    let fx = null;
+    try {
+      const { createEmber } = await import('./ember.js');
+      band.classList.add('has-glass');
+      fx = createEmber(canvas, {
+        accent: phosphorHex(), theme: d.getAttribute('data-theme'), still: reduceMotion, force: fxForce,
+        onGiveUp: () => band.classList.remove('has-glass'),
+      });
+    } catch (err) { console.warn('[ember]', err); }
+    if (!fx) { band.classList.remove('has-glass'); return; }
+    state.ember = fx;
+  });
+}
+
 // ------------------------------------------------------------------ boot sequence
 function fontsReady() {
   const fonts = document.fonts?.ready || Promise.resolve();
@@ -1346,6 +1444,9 @@ function init() {
   safe('links', initLinks);
   safe('palette', initPalette);
   safe('playground', () => initPlayground({ toast, reduceMotion }));
+  safe('face', initFace);
+  safe('void', initVoid);
+  safe('ember', initEmber);
   safe('reveal-observer', initRevealObserver);
 
   if (!hasGSAP) { fallback(); return; }

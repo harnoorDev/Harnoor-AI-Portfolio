@@ -226,6 +226,10 @@ language switches, or markdown injection.</pre>
           </div>
           <div class="pg__pane">
             <div class="pg__head"><span>// AGENT.response</span><span class="pg__state" id="pgStatus">Idle</span></div>
+            <div class="pg__target" hidden aria-hidden="true">
+              <canvas class="pg__face"></canvas>
+              <div class="pg__tlabel mono-label"><span>// target.model</span><span data-face-state>Guarded</span></div>
+            </div>
             <div class="pg__out" id="pgOutput" aria-live="polite" data-lenis-prevent><span class="sys">// Awaiting probe. Pick a canned attack on the left, or write your own.
 
 // What will happen: your input is sent to <span class="acc" data-model>claude-haiku-5-5</span> with the system prompt above. The agent will try to refuse · judge for yourself how well it holds.</span></div>
@@ -752,27 +756,30 @@ language switches, or markdown injection.</pre>
 
   <!-- ============================== 007 · CONTACT ============================== -->
   <section class="contact" id="contact" aria-labelledby="contact-title">
-    <div class="wrap">
-      <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>008 / End transmission</span></p>
-      <h2 class="contact__big" id="contact-title">Let's build<br>something<br><em>unbreakable.</em></h2>
-      <div class="clinks">
-        <a class="clink" href="mailto:harnoor24@outlook.com" data-cursor="Write">
-          <span class="mono-label">// Email</span><span class="clink__v">harnoor24@outlook.com</span><span class="clink__arr" aria-hidden="true">↗</span>
-        </a>
-        <a class="clink" href="https://www.linkedin.com/in/harnoors" target="_blank" rel="noopener" data-cursor="Connect">
-          <span class="mono-label">// LinkedIn</span><span class="clink__v">/in/harnoors</span><span class="clink__arr" aria-hidden="true">↗</span>
-        </a>
-        <a class="clink" href="https://github.com/harnoorDev" target="_blank" rel="noopener" data-cursor="Follow">
-          <span class="mono-label">// GitHub</span><span class="clink__v">/harnoorDev</span><span class="clink__arr" aria-hidden="true">↗</span>
-        </a>
-      </div>
-      <div class="contact__row">
-        <a class="cta" href="mailto:harnoor24@outlook.com">Get in touch <span class="cta__arr" aria-hidden="true">→</span></a>
-        <button class="btn" type="button" data-copy-email>Copy email</button>
-        <span class="mono-label">Toronto, CA · Eastern Time</span>
+    <div class="contact__stage">
+      <canvas class="contact__void" aria-hidden="true"></canvas>
+      <div class="wrap">
+        <p class="sec-kicker mono-label"><span class="bar" aria-hidden="true"></span><span data-scramble>008 / End transmission</span></p>
+        <h2 class="contact__big" id="contact-title">Let's build<br>something<br><em>unbreakable.</em></h2>
+        <div class="clinks">
+          <a class="clink" href="mailto:harnoor24@outlook.com" data-cursor="Write">
+            <span class="mono-label">// Email</span><span class="clink__v">harnoor24@outlook.com</span><span class="clink__arr" aria-hidden="true">↗</span>
+          </a>
+          <a class="clink" href="https://www.linkedin.com/in/harnoors" target="_blank" rel="noopener" data-cursor="Connect">
+            <span class="mono-label">// LinkedIn</span><span class="clink__v">/in/harnoors</span><span class="clink__arr" aria-hidden="true">↗</span>
+          </a>
+          <a class="clink" href="https://github.com/harnoorDev" target="_blank" rel="noopener" data-cursor="Follow">
+            <span class="mono-label">// GitHub</span><span class="clink__v">/harnoorDev</span><span class="clink__arr" aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="contact__row">
+          <a class="cta" href="mailto:harnoor24@outlook.com">Get in touch <span class="cta__arr" aria-hidden="true">→</span></a>
+          <button class="btn" type="button" data-copy-email>Copy email</button>
+          <span class="mono-label">Toronto, CA · Eastern Time</span>
+        </div>
       </div>
     </div>
-    <div class="finale" aria-hidden="true"><span class="finale__word">Harnoor<i>.</i></span></div>
+    <div class="finale" aria-hidden="true"><span class="finale__word">Harnoor<i>.</i></span><canvas class="finale__glass"></canvas></div>
   </section>
 </main>
 

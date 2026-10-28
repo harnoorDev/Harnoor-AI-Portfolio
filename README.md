@@ -18,15 +18,24 @@ Vercel function that powers the live "jailbreak a toy banking agent" demo.
     rendered as a 1-bit Bayer dither.
   - `fluid`: `public/assets/js/fluid.js`, the stable-fluids ink, shown behind
     the hero and contact sections only.
+  - `ascii`: `public/assets/js/ascii.js`, the same section shapes traced once
+    per character cell and drawn as live JetBrains Mono glyphs.
 
   Every backdrop pauses when the tab is hidden, steps its own quality down on
   slow GPUs, refuses software renderers, and falls back (swarm/dither → fluid →
-  static gradient). Reduced-motion users get the static gradient.
+  static gradient; ascii falls back the same way). Reduced-motion users get the
+  static gradient.
 - **Showreel layer** (in `main.js`): the page plays like a reel. A fixed frame
   shows the current scene and a scroll-driven timecode; the jailbroken models
   run as a pinned kinetic-type sequence (struck, stamped, then "Safe → Tested.");
   the career ladder is drawn live on a canvas oscilloscope; the page ends on a
   giant wordmark. With reduced motion each one is plain static markup.
+- **Section shaders** (`public/assets/js/shaderfx.js` runtime): the demo's
+  target is a face made of live code (`face.js`) that glitches while a probe
+  runs, locks when the guardrail holds and shatters on a breach; a ray-traced
+  black hole sits behind contact (`void.js`); fire through fluted glass burns
+  inside the closing wordmark (`ember.js`). Each loads near its section, runs
+  only on screen, and falls back to the plain layout without WebGL.
 - **API:** `api/probe.mjs` calls Claude behind a hardened system prompt.
 - **Fonts:** Instrument Serif, Geist, JetBrains Mono, self-hosted latin subsets
   (SIL OFL 1.1) in `public/assets/fonts/`. No third-party requests at runtime,
@@ -43,6 +52,11 @@ public/assets/js/main.js      motion system, palette, cursor, sections
 public/assets/js/swarm.js     WebGL2 particle swarm backdrop (default)
 public/assets/js/dither.js    1-bit dithered raymarch backdrop
 public/assets/js/fluid.js     WebGL fluid simulation backdrop
+public/assets/js/ascii.js     live-character backdrop
+public/assets/js/shaderfx.js  runtime for the section shaders below
+public/assets/js/face.js      demo target: a face made of live code
+public/assets/js/void.js      black hole behind contact
+public/assets/js/ember.js     fire through fluted glass in the wordmark
 public/assets/js/playground.js  demo console + offline simulated agent
 public/writing/…              Field Notes 001 (unchanged)
 public/play/…                 Arcade (Packet is live; Triage + Agent Loop marked "soon")
@@ -76,3 +90,9 @@ Firewall rate-limit rule on `/api/probe` and a spend limit on the Anthropic key.
 
 `⌘K` / `/` opens the command palette (navigate, copy email, toggle theme, cycle
 accent colour, replay the intro). The intro plays once per browser session.
+
+## Credits
+
+The glyph face, black hole, ember glass and ASCII backdrop are rebuilt from
+techniques in dvklab's [Hacktemplates](https://github.com/diiviikk5/Hacktemplates)
+(MIT). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
